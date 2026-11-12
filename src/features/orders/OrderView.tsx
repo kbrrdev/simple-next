@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Loading } from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import { ApiError, errorMessage } from '@/lib/api';
 import { isId } from '@/lib/search-params';
@@ -18,6 +17,7 @@ import {
 } from './api';
 import { OrderDetails } from './OrderDetails';
 import { PaymentReferenceForm } from './PaymentReferenceForm';
+import { OrderSkeleton } from '@/components/skeletons';
 
 function NotFound() {
   return (
@@ -62,7 +62,7 @@ function LoadedOrder({ id }: { id: string }) {
   const order = useOrder(id);
   const submitPayment = useSubmitPayment(id);
 
-  if (order.isPending) return <Loading label="Loading your order..." />;
+  if (order.isPending) return <OrderSkeleton />;
   if (order.error instanceof ApiError && order.error.status === 404) return <NotFound />;
   if (order.error) {
     return (

@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { Loading } from '@/components/Loading';
 import { getCategoryTree, getProducts } from '@/features/catalog/api';
 import { CategoryList } from '@/features/catalog/CategoryList';
 import { ProductGrid } from '@/features/catalog/ProductGrid';
+import { CategoryListSkeleton, ProductGridSkeleton } from '@/components/skeletons';
 
 async function Categories() {
   const categories = await getCategoryTree();
@@ -27,7 +27,7 @@ async function NewArrivals() {
 export default function HomePage() {
   return (
     <div className="space-y-10">
-      <Suspense fallback={<Loading label="Loading categories..." />}>
+      <Suspense fallback={<CategoryListSkeleton />}>
         <Categories />
       </Suspense>
       <section className="space-y-4">
@@ -37,7 +37,7 @@ export default function HomePage() {
             See all
           </Link>
         </div>
-        <Suspense fallback={<Loading label="Loading products..." />}>
+        <Suspense fallback={<ProductGridSkeleton />}>
           <NewArrivals />
         </Suspense>
       </section>

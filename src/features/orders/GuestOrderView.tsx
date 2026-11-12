@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useSyncExternalStore } from 'react';
-import { Loading } from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import { ApiError, errorMessage } from '@/lib/api';
 import {
@@ -12,6 +11,7 @@ import {
 } from './api';
 import { OrderDetails } from './OrderDetails';
 import { PaymentReferenceForm } from './PaymentReferenceForm';
+import { OrderSkeleton } from '@/components/skeletons';
 
 function subscribe(listener: () => void) {
   window.addEventListener('hashchange', listener);
@@ -82,11 +82,11 @@ export function GuestOrderView() {
   const token = useTokenFromHash();
   const order = useGuestOrder(token ?? null);
 
-  if (token === undefined) return <Loading label="Loading your order..." />;
+  if (token === undefined) return <OrderSkeleton />;
   if (!token || (order.error instanceof ApiError && order.error.status === 404)) {
     return <p>This order link is not valid. Check that you copied the whole link.</p>;
   }
-  if (order.isPending) return <Loading label="Loading your order..." />;
+  if (order.isPending) return <OrderSkeleton />;
   if (order.error) {
     return (
       <p role="alert" className="text-destructive">

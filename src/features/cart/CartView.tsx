@@ -4,12 +4,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { Loading } from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/api';
 import { formatCents } from '@/lib/money';
 import { useCart, useRemoveFromCart, useSetQuantity, type CartItem } from './api';
 import { guestCart, maxItemQuantity } from './guest-cart';
+import { CartSkeleton } from '@/components/skeletons';
 
 // Mirrors the backend's rule as a hint. The backend refuses larger guest orders.
 const maxGuestOrderQuantity = 10;
@@ -120,7 +120,7 @@ export function CartView() {
     toast.warning('An item in your cart is no longer sold, so it was removed.');
   }, [missingIds]);
 
-  if (isPending) return <Loading label="Loading your cart..." />;
+  if (isPending) return <CartSkeleton />;
   if (error) {
     return (
       <p role="alert" className="text-destructive">

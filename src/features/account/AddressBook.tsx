@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Loading } from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import {
   maxAddresses,
@@ -25,6 +24,7 @@ import {
 import { AddressForm } from '@/features/checkout/AddressForm';
 import { errorMessage } from '@/lib/api';
 import { formError } from '@/lib/form-errors';
+import { CardListSkeleton } from '@/components/skeletons';
 
 function toInput(address: Address): AddressInput {
   const { recipientName, phone, line1, line2, barangay, city, province, postalCode } = address;
@@ -82,7 +82,7 @@ export function AddressBook() {
   const [editing, setEditing] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Address | null>(null);
 
-  if (addresses.isPending) return <Loading label="Loading your addresses..." />;
+  if (addresses.isPending) return <CardListSkeleton label="Loading your addresses" />;
   if (addresses.error) {
     return (
       <p role="alert" className="text-destructive">

@@ -206,6 +206,7 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 
 - Use Tailwind CSS utility classes. Move repeated markup into shared components rather than creating custom CSS classes.
 - shadcn/ui components are copied into `src/components/ui`, and are this project's own code. Add each one only when a page needs it.
+- Pages and sections show a skeleton from `src/components/skeletons.tsx` while they load, shaped like the content to come, so that nothing moves when it arrives. Each skeleton announces what is loading to screen readers through `role="status"`, and hides its blocks. The pulse stops for people who ask for less motion. Small inline waits, such as the checkout total, keep the `Loading` text.
 
 ## Configuration
 

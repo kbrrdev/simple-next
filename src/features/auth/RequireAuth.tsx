@@ -2,9 +2,9 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { Loading } from '@/components/Loading';
 import { useSession } from './api';
 import { loginHref } from './redirect';
+import { PageSkeleton } from '@/components/skeletons';
 
 /** Shows its children to logged-in shoppers, and sends everyone else to log in. */
 export function RequireAuth({ children }: { children: ReactNode }) {
@@ -17,7 +17,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     if (loggedOut) router.replace(loginHref(pathname + window.location.search));
   }, [loggedOut, pathname, router]);
 
-  if (!user) return <Loading label="Loading..." />;
+  if (!user) return <PageSkeleton />;
 
   return children;
 }

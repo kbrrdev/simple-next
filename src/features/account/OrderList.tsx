@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loading } from '@/components/Loading';
 import { Pagination } from '@/components/Pagination';
 import { Label } from '@/components/ui/label';
 import { ordersPageSize, useOrders, type OrderStatus } from '@/features/orders/api';
@@ -11,6 +10,7 @@ import { errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
 import { readPage } from '@/lib/search-params';
+import { OrderListSkeleton } from '@/components/skeletons';
 
 function readStatus(value: string | null): OrderStatus | undefined {
   return orderStatuses.find((status) => status === value);
@@ -52,7 +52,7 @@ export function OrderList() {
         </select>
       </div>
 
-      {orders.isPending && <Loading label="Loading your orders..." />}
+      {orders.isPending && <OrderListSkeleton />}
       {orders.error && (
         <p role="alert" className="text-destructive">
           Your orders could not be loaded. {errorMessage(orders.error)}
