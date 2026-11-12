@@ -4,7 +4,7 @@ The customer storefront for the [simple-express](https://github.com/kbrrdev/simp
 
 See [docs/architecture.md](docs/architecture.md) for how it works, and [PRODUCT.md](PRODUCT.md) for who it is for.
 
-**Status:** planned. The documents describe the intended design, and the app is not scaffolded yet.
+**Status:** the project is set up, and the store pages are not built yet. The documents describe the intended design.
 
 ## Setup
 
