@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { productGridClass, productImageClass } from '@/features/catalog/grid';
 import { cn } from '@/lib/utils';
 
 /**
@@ -29,48 +30,46 @@ function repeat(count: number) {
 }
 
 /** The same grid as ProductGrid. */
-export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
+export function ProductGridSkeleton({ count = 10 }: { count?: number }) {
   return (
-    <Loading
-      label="Loading products"
-      className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4"
-    >
+    <Loading label="Loading products" className={productGridClass}>
       {repeat(count).map((index) => (
         <div key={index} className="space-y-2">
-          <Skeleton className="aspect-square" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className={productImageClass} />
+          <Skeleton className="mt-3 h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-1/4" />
         </div>
       ))}
     </Loading>
   );
 }
 
-/** The same grid as CategoryList, under its heading. */
-export function CategoryListSkeleton() {
+/** The category tabs under the header. */
+export function CategoryTabsSkeleton() {
   return (
-    <Loading label="Loading categories" className="space-y-4">
-      <Skeleton className="h-7 w-48" />
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {repeat(4).map((index) => (
-          <div key={index} className="space-y-2">
-            <Skeleton className="aspect-[4/3]" />
-            <Skeleton className="h-5 w-1/2" />
-          </div>
-        ))}
-      </div>
-    </Loading>
+    <div aria-hidden className="flex gap-8 overflow-hidden pt-4 pb-3">
+      {repeat(8).map((index) => (
+        <div key={index} className="flex shrink-0 flex-col items-center gap-2">
+          <Skeleton className="size-6 rounded-full" />
+          <Skeleton className="h-3 w-14" />
+        </div>
+      ))}
+    </div>
   );
 }
 
-/** A product list page: heading, sort links, and the grid. */
+/** A product list page: tabs, heading, count, and the grid. */
 export function ProductListPageSkeleton() {
   return (
-    <div className="space-y-6">
-      <Skeleton className="h-8 w-56" />
-      <Skeleton className="h-5 w-40" />
+    <>
+      <CategoryTabsSkeleton />
+      <div aria-hidden className="space-y-2 pt-8 pb-6">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-4 w-24" />
+      </div>
       <ProductGridSkeleton />
-    </div>
+    </>
   );
 }
 

@@ -1,46 +1,48 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { getCategoryTree, getProducts } from '@/features/catalog/api';
-import { CategoryList } from '@/features/catalog/CategoryList';
+import { CategoryTabsSkeleton, ProductGridSkeleton } from '@/components/skeletons';
+import { env } from '@/config/env';
+import { getProducts } from '@/features/catalog/api';
+import { CategoryTabs } from '@/features/catalog/CategoryTabs';
 import { ProductGrid } from '@/features/catalog/ProductGrid';
-import { CategoryListSkeleton, ProductGridSkeleton } from '@/components/skeletons';
 
-async function Categories() {
-  const categories = await getCategoryTree();
-  if (categories.length === 0) return null;
+const homeProducts = 20;
+
+async function NewArrivals() {
+  const { data: products, meta } = await getProducts({ sort: 'newest', limit: homeProducts });
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-semibold">Shop by category</h2>
-      <CategoryList categories={categories} />
-    </section>
+    <>
+      <ProductGrid products={products} empty="No products yet. Check back soon." />
+      {meta.total > products.length && (
+        <div className="flex flex-col items-center gap-4 pt-14">
+          <p className="text-lg font-semibold">Continue exploring</p>
+          <Link
+            href="/search"
+            className="rounded-lg bg-foreground px-6 py-3 font-semibold text-background transition-opacity hover:opacity-90"
+          >
+            Show all {meta.total.toLocaleString('en-PH')} products
+          </Link>
+        </div>
+      )}
+    </>
   );
 }
 
-async function NewArrivals() {
-  const { data: products } = await getProducts({ sort: 'newest', limit: 12 });
-  return <ProductGrid products={products} empty="No products yet. Check back soon." />;
-}
-
 // Public data is cached for only 60 seconds, which Next.js keeps out of the instant page shell,
-// so each section streams in behind its own placeholder.
+// so each part streams in behind its own placeholder.
 export default function HomePage() {
   return (
-    <div className="space-y-10">
-      <Suspense fallback={<CategoryListSkeleton />}>
-        <Categories />
+    <>
+      <h1 className="sr-only">{env.storeName}</h1>
+      <Suspense fallback={<CategoryTabsSkeleton />}>
+        <CategoryTabs activeId={null} />
       </Suspense>
-      <section className="space-y-4">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-xl font-semibold">New arrivals</h2>
-          <Link href="/search" className="text-sm underline">
-            See all
-          </Link>
-        </div>
+      <div className="pt-8">
         <Suspense fallback={<ProductGridSkeleton />}>
           <NewArrivals />
         </Suspense>
-      </section>
-    </div>
+      </div>
+    </>
   );
 }

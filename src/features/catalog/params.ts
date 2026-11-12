@@ -16,10 +16,16 @@ export function readSearch(value: SearchParam) {
 /** A product list's address, leaving out default values so that links stay short. */
 export function productListHref(
   path: string,
-  { search, sort, page }: { search?: string; sort: ProductSort; page: number },
+  {
+    search,
+    categoryId,
+    sort,
+    page,
+  }: { search?: string; categoryId?: string; sort: ProductSort; page: number },
 ) {
   const params = new URLSearchParams();
   if (search) params.set('q', search);
+  if (categoryId) params.set('categoryId', categoryId);
   if (sort !== 'newest') params.set('sort', sort);
   if (page > 1) params.set('page', String(page));
 

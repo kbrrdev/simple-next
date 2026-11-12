@@ -204,6 +204,13 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 
 ## Styling
 
+The layout follows a listings site's structure: a sticky header with the search pill in the middle, a scrolling row of category tabs, a wide grid of large photo cards, and a footer band. Colour and type stay quiet, so that the products lead.
+
+- The theme lives in `src/styles/globals.css`. `--brand` is the one accent colour, used for main buttons, the search button, the cart count, selected tabs, and focus rings. The rest is near-black text, greys, and thin lines. The font is Figtree, downloaded at build time by `next/font`.
+- The logo is a file under `public/`, set in `src/config/brand.ts`. Without one, the store name shows as a wordmark.
+- `page-x` sets the page's side margins, and `productGridClass` in `src/features/catalog/grid.ts` the product grid: one column on phones, up to five on wide screens.
+- The header (`src/components/layout`) holds the logo, the search pill, the cart, and the account menu. On phones, the cart and account move to a tab bar along the bottom, which checkout hides.
+- Product cards swipe through their photos on touch screens, and show arrows on hover. Photos that fail to load show a quiet placeholder through `FallbackImage`.
 - Use Tailwind CSS utility classes. Move repeated markup into shared components rather than creating custom CSS classes.
 - shadcn/ui components are copied into `src/components/ui`, and are this project's own code. Add each one only when a page needs it.
 - Pages and sections show a skeleton from `src/components/skeletons.tsx` while they load, shaped like the content to come, so that nothing moves when it arrives. Each skeleton announces what is loading to screen readers through `role="status"`, and hides its blocks. The pulse stops for people who ask for less motion. Small inline waits, such as the checkout total, keep the `Loading` text.
