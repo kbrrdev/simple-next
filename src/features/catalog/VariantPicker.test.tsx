@@ -53,6 +53,29 @@ describe('VariantPicker', () => {
     expect(screen.getByRole('radio', { name: 'Blue' })).toBeChecked();
   });
 
+  it('highlights exactly the chosen values, even when one option moves the other', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <VariantPicker option1Name="Size" option2Name="Color" variants={variants} />,
+    );
+    const highlighted = () =>
+      [...container.querySelectorAll('label[data-selected]')].map((label) => label.textContent);
+
+    expect(highlighted()).toEqual(['S', 'Red']);
+
+    await user.click(screen.getByRole('radio', { name: 'M' }));
+    expect(highlighted()).toEqual(['M', 'Red']);
+
+    await user.click(screen.getByRole('radio', { name: 'Blue' }));
+    expect(highlighted()).toEqual(['M', 'Blue']);
+
+    // S only comes in Red, so choosing it moves the color too.
+    await user.click(screen.getByRole('radio', { name: 'S' }));
+    expect(highlighted()).toEqual(['S', 'Red']);
+    expect(screen.getByRole('radio', { name: 'Red' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Blue' })).not.toBeChecked();
+  });
+
   it('shows only the price for products without options', () => {
     renderWithQuery(
       <VariantPicker
