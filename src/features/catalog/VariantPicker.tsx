@@ -46,12 +46,17 @@ export function VariantPicker({ option1Name, option2Name, variants }: VariantPic
           <div className="flex flex-wrap gap-2">
             {optionValues(variants, option).map((value) => {
               const disabled = option === 2 && !isAvailable(variants, selection.option1, value);
+              const isSelected = selected === value;
 
               return (
+                // The highlight follows React's state, not `:has(:checked)`, which browsers do not
+                // always restyle when a radio is unchecked by choosing another in its group.
                 <label
                   key={value}
+                  data-selected={isSelected || undefined}
                   className={cn(
-                    'cursor-pointer rounded-md border px-3 py-1.5 text-sm has-checked:border-foreground has-checked:bg-foreground has-checked:text-background has-focus-visible:ring-2 has-focus-visible:ring-ring',
+                    'relative cursor-pointer rounded-md border px-3 py-1.5 text-sm has-focus-visible:ring-2 has-focus-visible:ring-ring',
+                    isSelected && 'border-foreground bg-foreground text-background',
                     disabled && 'cursor-not-allowed opacity-40',
                   )}
                 >
@@ -59,7 +64,7 @@ export function VariantPicker({ option1Name, option2Name, variants }: VariantPic
                     type="radio"
                     name={`option${option}`}
                     value={value}
-                    checked={selected === value}
+                    checked={isSelected}
                     disabled={disabled}
                     onChange={() => setSelection(selectOption(variants, selection, option, value))}
                     className="sr-only"
