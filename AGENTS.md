@@ -100,17 +100,17 @@ This is the customer storefront for the `simple-express` backend. The admin app 
 - Handle the backend's response shapes: `{ data }`, `{ data, meta }`, and `{ error }`.
 - Store and send money as integer cents. Format it only for display.
 - Never calculate authoritative prices, totals, tax, shipping, stock, or payment status in the browser. Show what the API returns.
-- Cache public server fetches for a short time only, as prices and stock change.
+- Cache public server fetches for 60 seconds, as prices and stock change.
 - Keep request and response handling consistent.
 
 ## Cart and Checkout
 
-- A guest's cart lives in `localStorage`, as variant IDs and quantities only. Price it with `POST /api/cart/preview`.
-- After login, merge the guest cart with `POST /api/cart/merge`, then clear it.
-- Show the adjustments the API reports, such as reduced quantities or items no longer available.
-- Before placing an order, show the total from `POST /api/orders/preview`, and send it as `expectedTotalCents`.
+Follow the Cart, Checkout, and Guest Orders sections of `docs/architecture.md`. In short:
+
+- `localStorage` holds only the guest cart, as variant IDs and quantities. Nothing else goes there.
+- Show the total from `POST /api/orders/preview`, and send it as `expectedTotalCents`.
 - Create one `idempotencyKey` per checkout attempt, and reuse it when retrying that attempt, so that a retry never places two orders.
-- Show the backend's checkout `details` next to the affected items.
+- Do not offer cash on delivery to guests.
 
 ## Validation and Error Handling
 
@@ -126,7 +126,8 @@ This is the customer storefront for the `simple-express` backend. The admin app 
 - Keep the access token in memory only. Never put it in `localStorage`, `sessionStorage`, a cookie the app sets, or a URL.
 - Refresh the session through the `httpOnly` cookie, with `credentials: 'include'`.
 - On a `401`, refresh once and retry the request once. If that fails, send the user to log in.
-- Guest order links hold a private token. Never log them, never send them to analytics, and keep those pages out of search engines.
+- Guest order and password reset tokens go in the URL fragment, after `#`, so that they never reach a server. Never log them, never send them to analytics, and keep those pages out of search engines.
+- The storefront and the admin are always separate apps, with their own login pages.
 - Render API data as text. Never insert it as HTML.
 - Never log tokens, passwords, or personal data to the console.
 
