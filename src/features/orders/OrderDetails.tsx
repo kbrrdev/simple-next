@@ -1,32 +1,17 @@
 import Image from 'next/image';
+import type { ReactNode } from 'react';
 import { OrderTotals } from '@/components/OrderTotals';
 import { formatAddress } from '@/features/checkout/address';
 import { formatDate, formatDateTime } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
 import type { GuestOrder, Order } from './api';
-
-const statusLabels: Record<Order['status'], string> = {
-  awaiting_payment: 'Waiting for payment',
-  pending: 'Being prepared',
-  confirmed: 'Confirmed',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  returned: 'Returned',
-  cancelled: 'Cancelled',
-};
-
-const paymentLabels: Record<Order['paymentStatus'], string> = {
-  unpaid: 'Not paid',
-  submitted: 'Payment reference sent, waiting for confirmation',
-  paid: 'Paid',
-  refunded: 'Refunded',
-};
+import { paymentLabels, statusLabels } from './status';
 
 function PaymentInstructions({ order }: { order: Order | GuestOrder }) {
   if (order.paymentType === 'cod') {
     return <p>Pay {formatCents(order.totalCents)} in cash when your order arrives.</p>;
   }
-  if (order.status !== 'awaiting_payment' || !order.payment) {
+  if (order.status !== 'awaiting_payment' || order.paymentStatus !== 'unpaid' || !order.payment) {
     return <p>{paymentLabels[order.paymentStatus]}</p>;
   }
 
@@ -63,14 +48,23 @@ function PaymentInstructions({ order }: { order: Order | GuestOrder }) {
         </div>
       )}
       <p className="text-sm text-muted-foreground">
-        Keep your payment reference, as the store confirms it before preparing your order.
+        After paying, send the reference number below. The store confirms it before preparing your
+        order.
       </p>
     </div>
   );
 }
 
 /** An order as the shopper sees it, for accounts and guests. */
-export function OrderDetails({ order }: { order: Order | GuestOrder }) {
+interface OrderDetailsProps {
+  order: Order | GuestOrder;
+  /** Shown under the payment instructions, such as the payment reference form. */
+  paymentAction?: ReactNode;
+  /** Shown at the end, such as the cancel button. */
+  actions?: ReactNode;
+}
+
+export function OrderDetails({ order, paymentAction, actions }: OrderDetailsProps) {
   return (
     <div className="space-y-8">
       <div className="space-y-1">
@@ -85,6 +79,7 @@ export function OrderDetails({ order }: { order: Order | GuestOrder }) {
           Payment
         </h2>
         <PaymentInstructions order={order} />
+        {paymentAction}
       </section>
 
       <section className="space-y-3" aria-labelledby="items-heading">
@@ -129,6 +124,8 @@ export function OrderDetails({ order }: { order: Order | GuestOrder }) {
           <p>{formatAddress(order.shippingAddress)}</p>
         </section>
       )}
+
+      {actions}
     </div>
   );
 }

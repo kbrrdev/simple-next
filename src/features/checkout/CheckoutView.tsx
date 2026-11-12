@@ -8,6 +8,7 @@ import { Field } from '@/components/Field';
 import { Loading } from '@/components/Loading';
 import { OrderTotals } from '@/components/OrderTotals';
 import { Button } from '@/components/ui/button';
+import { useAddresses, useCreateAddress } from '@/features/addresses/api';
 import { useSession } from '@/features/auth/session';
 import { useCart } from '@/features/cart/api';
 import { ApiError, errorMessage } from '@/lib/api';
@@ -22,8 +23,6 @@ import {
 } from './address';
 import { AddressForm } from './AddressForm';
 import {
-  useAddresses,
-  useCreateAddress,
   useOrderPreview,
   usePaymentMethods,
   usePlaceAccountOrder,

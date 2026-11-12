@@ -47,17 +47,43 @@ export function useRegister() {
   });
 }
 
-export function useLogout() {
+function useEndSession() {
   const queryClient = useQueryClient();
+
+  return () => {
+    setAccessToken(null);
+    queryClient.setQueryData(sessionKey, null);
+    // Drops the shopper's cached data. The session query stays, as the header watches it.
+    queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== sessionKey[0] });
+  };
+}
+
+export function useLogout() {
+  const endSession = useEndSession();
 
   return useMutation({
     mutationFn: () => request('/api/auth/logout', { method: 'POST' }),
     // Logged out locally even when the request fails, as the session may already be gone.
-    onSettled: () => {
-      setAccessToken(null);
-      queryClient.setQueryData(sessionKey, null);
-      // Drops the shopper's cached data. The session query stays, as the header watches it.
-      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== sessionKey[0] });
-    },
+    onSettled: endSession,
+  });
+}
+
+/** Ends every session, on every device, including this one. */
+export function useLogoutEverywhere() {
+  const endSession = useEndSession();
+
+  return useMutation({
+    mutationFn: () => request('/api/auth/logout-all', { method: 'POST' }),
+    // Only on success: if it failed, the other devices are still logged in, so the shopper
+    // stays here to try again.
+    onSuccess: endSession,
+  });
+}
+
+/** Changes the password. The API keeps this session, and ends the others. */
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (body: { currentPassword: string; newPassword: string }) =>
+      request('/api/auth/change-password', { method: 'POST', body }),
   });
 }

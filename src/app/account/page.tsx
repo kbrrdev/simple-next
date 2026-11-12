@@ -1,19 +1,15 @@
 import type { Metadata } from 'next';
+import { AccountPage } from '@/features/account/AccountPage';
 import { AccountSummary } from '@/features/auth/AccountSummary';
-import { RequireAuth } from '@/features/auth/RequireAuth';
 
 export const metadata: Metadata = {
   title: 'Account',
-  robots: { index: false },
 };
 
-export default function AccountPage() {
+export default function AccountRoute() {
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Account</h1>
-      <RequireAuth>
-        <AccountSummary />
-      </RequireAuth>
-    </div>
+    <AccountPage title="Account">
+      <AccountSummary />
+    </AccountPage>
   );
 }

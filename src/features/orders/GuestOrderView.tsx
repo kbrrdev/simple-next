@@ -4,8 +4,14 @@ import { useState, useSyncExternalStore } from 'react';
 import { Loading } from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import { ApiError, errorMessage } from '@/lib/api';
-import { useGuestOrder } from './api';
+import {
+  needsPaymentReference,
+  useGuestOrder,
+  useSubmitGuestPayment,
+  type GuestOrder,
+} from './api';
 import { OrderDetails } from './OrderDetails';
+import { PaymentReferenceForm } from './PaymentReferenceForm';
 
 function subscribe(listener: () => void) {
   window.addEventListener('hashchange', listener);
@@ -89,10 +95,23 @@ export function GuestOrderView() {
     );
   }
 
+  return <LoadedGuestOrder token={token} order={order.data} />;
+}
+
+function LoadedGuestOrder({ token, order }: { token: string; order: GuestOrder }) {
+  const submitPayment = useSubmitGuestPayment(token);
+
   return (
     <div className="space-y-8">
       <SaveLink />
-      <OrderDetails order={order.data} />
+      <OrderDetails
+        order={order}
+        paymentAction={
+          needsPaymentReference(order) && (
+            <PaymentReferenceForm providerName={order.paymentProvider} submit={submitPayment} />
+          )
+        }
+      />
     </div>
   );
 }
