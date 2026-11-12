@@ -5,7 +5,6 @@ import {
   BlogListSkeleton,
   CardListSkeleton,
   CartSkeleton,
-  CategoryListSkeleton,
   CheckoutSkeleton,
   OrderListSkeleton,
   OrderSkeleton,
@@ -16,7 +15,6 @@ import {
 
 const skeletons: [string, ReactElement][] = [
   ['Loading products', <ProductGridSkeleton key="grid" />],
-  ['Loading categories', <CategoryListSkeleton key="categories" />],
   ['Loading product', <ProductPageSkeleton key="product" />],
   ['Loading posts', <BlogListSkeleton key="posts" />],
   ['Loading post', <ArticleSkeleton key="post" />],

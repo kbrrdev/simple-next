@@ -13,16 +13,23 @@ interface SortLinksProps {
   href: (sort: ProductSort) => string;
 }
 
+/** The sort order as a pill of two choices. */
 export function SortLinks({ current, href }: SortLinksProps) {
   return (
-    <nav aria-label="Sort products" className="flex gap-3 text-sm">
-      <span className="text-muted-foreground">Sort by</span>
+    <nav
+      aria-label="Sort products"
+      className="inline-flex items-center rounded-full border border-border p-1 text-sm"
+    >
       {sorts.map(({ value, label }) => (
         <Link
           key={value}
           href={href(value)}
+          scroll={false}
           aria-current={value === current ? 'true' : undefined}
-          className={cn(value === current ? 'font-semibold' : 'underline')}
+          className={cn(
+            'rounded-full px-4 py-1.5 transition-colors',
+            value === current ? 'bg-foreground font-semibold text-background' : 'hover:bg-muted',
+          )}
         >
           {label}
         </Link>

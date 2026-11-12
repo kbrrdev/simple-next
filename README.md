@@ -22,6 +22,13 @@ The app runs at `http://localhost:3001`, as the API uses port 3000. Add `http://
 
 To shop with sample data, run `npm run db:seed` in simple-express. It adds `customer@example.com`, with the password `dev-password-123`.
 
+## Theming
+
+Each store sets its look in two places, then rebuilds:
+
+1. **Brand colour.** In `src/styles/globals.css`, set `--brand`, `--brand-hover` (a little darker), and `--brand-foreground` (the text on it, white or near-black, whichever reads better).
+2. **Logo.** Put the file in `public/brand/`, such as `public/brand/logo.svg`, and set it in `src/config/brand.ts` with the image's width and height. Without a logo, the header shows `NEXT_PUBLIC_STORE_NAME` as a wordmark in the brand colour.
+
 ## Scripts
 
 | Script                 | Description                                                |

@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ApiError, refreshSession, request } from '@/lib/api';
 import { renderWithQuery } from '@/test/render';
-import { AccountLink } from './AccountLink';
+import { AccountMenu } from '@/components/layout/AccountMenu';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { RequireAuth } from './RequireAuth';
@@ -148,28 +148,39 @@ describe('RegisterForm', () => {
   });
 });
 
-describe('AccountLink', () => {
-  it('offers to log in when there is no session', async () => {
+describe('AccountMenu', () => {
+  it('offers to log in or sign up when there is no session', async () => {
     vi.mocked(refreshSession).mockResolvedValueOnce(false);
-    renderWithQuery(<AccountLink />);
+    renderWithQuery(<AccountMenu />);
 
-    expect(await screen.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login');
+    await userEvent.click(await screen.findByRole('button', { name: 'Log in or sign up' }));
+
+    expect(await screen.findByRole('menuitem', { name: 'Log in' })).toHaveAttribute(
+      'href',
+      '/login',
+    );
+    expect(screen.getByRole('menuitem', { name: 'Sign up' })).toHaveAttribute('href', '/register');
   });
 
-  it('links to the account when logged in', async () => {
+  it('lists the account pages when logged in', async () => {
     vi.mocked(refreshSession).mockResolvedValueOnce(true);
     vi.mocked(request).mockResolvedValueOnce({ data: user });
-    renderWithQuery(<AccountLink />);
+    renderWithQuery(<AccountMenu />);
 
-    expect(await screen.findByRole('link', { name: 'Account' })).toHaveAttribute(
+    await waitFor(() => expect(request).toHaveBeenCalledWith('/api/auth/me'));
+    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+
+    expect(await screen.findByText('shopper@example.com')).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Orders' })).toHaveAttribute(
       'href',
-      '/account',
+      '/account/orders',
     );
+    expect(screen.getByRole('menuitem', { name: 'Log out' })).toBeInTheDocument();
   });
 
   it('does not restore the session on the login page', () => {
     navigation.pathname = '/login';
-    renderWithQuery(<AccountLink />);
+    renderWithQuery(<AccountMenu />);
 
     expect(refreshSession).not.toHaveBeenCalled();
   });
