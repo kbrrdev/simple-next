@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, a basic account page, and the cart are built. Checkout and the rest of the account pages are not built yet.
+Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, a basic account page, the cart, checkout, and read-only order pages are built. The order list, payment submission, cancelling, and address management are not built yet.
 
 ## Request Lifecycle
 
@@ -76,9 +76,9 @@ src/
 | Product `/products/<id>`     | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
 | Blog `/blogs`, `/blogs/<id>` | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
 | Cart `/cart`                 | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
-| Checkout                     | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
-| Order confirmation           | Browser  | None. It shows the order the checkout just placed                                                      |
-| Guest order link             | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
+| Checkout `/checkout`         | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
+| Order `/orders/<id>`         | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                         |
+| `/orders/guest#token=`       | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
 | `/login`, `/register`        | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
 | Password reset               | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
 | Account `/account`           | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
@@ -135,11 +135,12 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 - `GET /api/payment-methods` lists the methods to choose from, without account details. `cod` is cash on delivery, and is offered to accounts only, as guests cannot use it.
 - `POST /api/orders/preview` returns the total, including tax and shipping, for the shopper to confirm.
 - Placing the order sends that total as `expectedTotalCents`. If prices changed in between, the API rejects the order, and the shopper sees the new total.
-- Each checkout attempt has one `idempotencyKey`, created when the shopper reaches the final step. Retrying the same attempt reuses it, so a slow network never places two orders.
-- Accounts check out with `POST /api/orders` and a saved address. Guests use `POST /api/orders/guest` with an email and address, and get a private order link.
+- Each checkout attempt has one `idempotencyKey`, created when the shopper first presses "Place order". Retrying the same attempt reuses it, so a slow network never places two orders. Changing the items, address, payment method, email, or total is a new attempt, with a new key. The key lives in the page's memory, so reloading the page mid-attempt starts a new one.
+- Accounts check out with `POST /api/orders` and a saved address, which orders the account's cart and empties it. A new address is saved with `POST /api/addresses` first, then chosen, so that a retry does not save it twice. Guests use `POST /api/orders/guest` with an email, an address that is not saved, and their cart's items, and get a private order link.
+- The address form checks required fields, the Philippine mobile number, and the 4-digit postal code as hints. The backend's field errors, named `phone` or `address.phone`, show next to the fields.
 - With a manual method, the order is `awaiting_payment`, and shows the account to pay and the deadline. The shopper pays outside the store, then submits the reference.
-- Failed checkouts return `details` for the affected items, such as out of stock. Show them next to those items.
-- After the order is placed, the confirmation page shows the order, and for a manual method, the account to pay and the deadline. For a guest, saving the order link is its main step.
+- Failed checkouts return `details` for the affected items, such as out of stock, named by `variantId`. They show next to those items. After any failure, the preview is loaded again, so the shopper sees the current total.
+- After the order is placed, accounts go to `/orders/<id>`, and guests to `/orders/guest#token=<token>`. Both show the order through `OrderDetails`: the status, the items and totals, the account to pay and the deadline for a manual method, and the shipping address. Payment submission and cancelling come later.
 
 ## Guest Orders
 
@@ -147,7 +148,8 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 - The token is in the fragment, so it never reaches the Next.js server, Caddy's logs, or another site. The page reads it from `location.hash`.
 - The backend returns `guestToken` only once, when the order is placed, and does not email it. The confirmation page shows the link with a copy button, and warns that it is the only way back to the order.
 - The link is not kept in `localStorage`, which holds only the guest cart.
-- Keep these pages out of search engines, and set `Referrer-Policy: no-referrer` on them.
+- Keep these pages out of search engines. `next.config.ts` sends `Referrer-Policy: no-referrer` for `/orders/guest`.
+- The guest order page always shows the link with a copy button, as the shopper may open it again from the confirmation.
 - Never log the link or send it to analytics.
 - Guest orders are never linked to accounts.
 

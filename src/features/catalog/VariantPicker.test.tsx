@@ -55,7 +55,7 @@ describe('VariantPicker', () => {
 
   it('highlights exactly the chosen values, even when one option moves the other', async () => {
     const user = userEvent.setup();
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VariantPicker option1Name="Size" option2Name="Color" variants={variants} />,
     );
     const highlighted = () =>

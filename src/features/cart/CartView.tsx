@@ -160,9 +160,8 @@ export function CartView() {
             items.
           </p>
         )}
-        {/* Checkout is built in a later step. */}
-        <Button className="w-full" disabled>
-          Checkout
+        <Button asChild className="w-full">
+          <Link href="/checkout">Checkout</Link>
         </Button>
       </aside>
     </div>

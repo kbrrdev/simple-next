@@ -6,7 +6,7 @@ import { useState, type FormEvent } from 'react';
 import { Field } from '@/components/Field';
 import { Button } from '@/components/ui/button';
 import { useRegister } from './api';
-import { fieldError, formError } from './errors';
+import { fieldError, formError } from '@/lib/form-errors';
 import { safeNext } from './redirect';
 
 // Mirrors the backend's rule as a hint. The backend also rejects common passwords.
