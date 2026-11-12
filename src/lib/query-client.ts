@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
-import { sessionKey } from '@/features/auth/api';
+import { sessionKey } from '@/features/auth/session';
 import { ApiError, setAccessToken } from './api';
 
 export function createQueryClient() {

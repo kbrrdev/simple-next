@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, and a basic account page are built. The cart, checkout, and the rest of the account pages are not built yet.
+Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, a basic account page, and the cart are built. Checkout and the rest of the account pages are not built yet.
 
 ## Request Lifecycle
 
@@ -75,7 +75,7 @@ src/
 | Search `/search?q=`          | Server   | `GET /api/products?search=`                                                                            |
 | Product `/products/<id>`     | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
 | Blog `/blogs`, `/blogs/<id>` | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
-| Cart                         | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
+| Cart `/cart`                 | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
 | Checkout                     | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
 | Order confirmation           | Browser  | None. It shows the order the checkout just placed                                                      |
 | Guest order link             | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
@@ -123,6 +123,12 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 - After login, `POST /api/cart/merge` moves the guest cart into the account, keeping the higher quantity for items in both. Then the guest cart is cleared.
 - Preview and merge return `adjustments` for reduced quantities and unavailable items. Show them, so the shopper knows what changed.
 - Carts do not hold stock. Stock is checked again when the order is placed.
+- `src/features/cart/api.ts` hides the difference: `useCart` returns the same priced cart for guests and accounts, and the add, quantity, and remove hooks update whichever cart the shopper has. They wait for the session to load, so that an early click goes to the right cart.
+- The guest cart is read back through `parseGuestCart`, which drops malformed lines, as stored data can be edited. Each line holds 1 to 99, the API's limit.
+- The preview leaves out variants that no longer exist. The cart page removes them from the guest cart, and says so. Unavailable items stay listed, marked, with a Remove button.
+- A guest cart over 10 items shows the guest order limit as a hint. The backend's error remains the authority at checkout.
+- If the merge fails, the guest cart is kept, and the shopper is told. Logging in still succeeds.
+- The header shows the number of items. A guest's count comes from the stored cart, and a logged-in shopper's from `GET /api/cart`, once per page load.
 
 ## Checkout
 

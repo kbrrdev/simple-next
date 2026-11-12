@@ -1,7 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useAddToCart } from '@/features/cart/api';
 import { formatCents } from '@/lib/money';
 import { cn } from '@/lib/utils';
 import {
@@ -23,6 +26,22 @@ export function VariantPicker({ option1Name, option2Name, variants }: VariantPic
   const [selection, setSelection] = useState(() => initialSelection(variants));
   const variant = findVariant(variants, selection);
   const inStock = (variant?.stock ?? 0) > 0;
+  const addToCart = useAddToCart();
+  const router = useRouter();
+
+  function handleAdd() {
+    if (!variant) return;
+
+    addToCart.mutate(
+      { variantId: variant.id, quantity: 1 },
+      {
+        onSuccess: () =>
+          toast.success('Added to cart', {
+            action: { label: 'View cart', onClick: () => router.push('/cart') },
+          }),
+      },
+    );
+  }
 
   const options = [
     { option: 1 as const, name: option1Name, selected: selection.option1 },
@@ -72,9 +91,13 @@ export function VariantPicker({ option1Name, option2Name, variants }: VariantPic
         </fieldset>
       ))}
 
-      {/* The cart is built in a later step. */}
-      <Button size="lg" className="w-full sm:w-auto" disabled>
-        Add to cart
+      <Button
+        size="lg"
+        className="w-full sm:w-auto"
+        disabled={!inStock || addToCart.isPending}
+        onClick={handleAdd}
+      >
+        {addToCart.isPending ? 'Adding...' : 'Add to cart'}
       </Button>
     </div>
   );
