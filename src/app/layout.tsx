@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import Link from 'next/link';
 import { Providers } from '@/components/providers';
+import { SearchForm } from '@/components/SearchForm';
 import { env } from '@/config/env';
 import '@/styles/globals.css';
 
@@ -11,6 +12,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(env.siteUrl),
   title: { default: env.storeName, template: `%s | ${env.storeName}` },
   description: `Shop online at ${env.storeName}.`,
 };
@@ -21,10 +23,16 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <Providers>
           <header className="border-b">
-            <div className="mx-auto flex h-14 max-w-6xl items-center px-4">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
               <Link href="/" className="font-semibold">
                 {env.storeName}
               </Link>
+              <nav aria-label="Main" className="text-sm">
+                <Link href="/blogs" className="hover:underline">
+                  Blog
+                </Link>
+              </nav>
+              <SearchForm />
             </div>
           </header>
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>

@@ -15,7 +15,12 @@ describe('env', () => {
       NEXT_PUBLIC_STORE_NAME: '',
     });
 
-    expect(env).toEqual({ apiUrl: 'http://api.test', storeName: 'Store' });
+    expect(env).toEqual({
+      apiUrl: 'http://api.test',
+      siteUrl: 'http://shop.test',
+      imageUrl: undefined,
+      storeName: 'Store',
+    });
   });
 
   it('uses the configured store name', async () => {
@@ -26,6 +31,12 @@ describe('env', () => {
 
   it('stops when the API URL is missing', async () => {
     await expect(loadEnv({ NEXT_PUBLIC_API_URL: '' })).rejects.toThrow(/is not set/);
+  });
+
+  it('reads an optional image URL', async () => {
+    const env = await loadEnv({ NEXT_PUBLIC_IMAGE_URL: 'https://cdn.test/bucket/' });
+
+    expect(env.imageUrl).toBe('https://cdn.test/bucket');
   });
 
   it('stops when the API URL is not a URL', async () => {

@@ -11,6 +11,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    env: { NEXT_PUBLIC_API_URL: 'http://api.test' },
+    env: { NEXT_PUBLIC_API_URL: 'http://api.test', NEXT_PUBLIC_SITE_URL: 'http://shop.test' },
   },
 });
