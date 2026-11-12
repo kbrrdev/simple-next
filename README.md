@@ -16,7 +16,10 @@ cp .env.example .env
 npm run dev
 ```
 
-The app runs at `http://localhost:3001`, as the API uses port 3000. Add `http://localhost:3001` to the backend's `CORS_ORIGINS`, which only allows the admin app by default.
+The app runs at `http://localhost:3001`, as the API uses port 3000. In the backend's `.env`:
+
+- Add `http://localhost:3001` to `CORS_ORIGINS`, which only allows the admin app by default.
+- Set `STOREFRONT_URL=http://localhost:3001`, so that password reset emails link to this app's `/reset-password` page. This setting is not in simple-express yet. See Open Questions in [docs/architecture.md](docs/architecture.md).
 
 To shop with sample data, run `npm run db:seed` in simple-express. It adds `customer@example.com`, with the password `dev-password-123`.
 

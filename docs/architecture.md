@@ -77,9 +77,10 @@ src/
 | Blog               | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
 | Cart               | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
 | Checkout           | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
+| Order confirmation | Browser  | None. It shows the order the checkout just placed                                                      |
 | Guest order link   | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
 | Login and register | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
-| Password reset     | Browser  | `POST /api/auth/forgot-password`, `/reset-password`                                                    |
+| Password reset     | Static   | `POST /api/auth/forgot-password`, `/reset-password`, sent only when the form is submitted              |
 | Account            | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
 | Addresses          | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
 | Orders             | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
@@ -90,11 +91,24 @@ src/
 - Access tokens last 15 minutes. Keep them in memory only, and send them as `Authorization: Bearer <token>`.
 - The refresh token is an `httpOnly` cookie named `refreshToken`, limited to the `/api/auth` path on the API's domain. JavaScript cannot read it, and the Next.js server never receives it.
 - Call `POST /api/auth/refresh` with an empty body and `credentials: 'include'`. It returns a new access token and rotates the cookie.
-- On page load, call refresh once to restore the session, as memory is cleared. A shopper who is not logged in gets a `401`, which is normal.
+- On page load, call refresh once to restore the session, as memory is cleared. A shopper who is not logged in gets a `401`, which is normal. The login, register, forgot password, and reset password pages skip it, as they do not need a session.
 - On a `401`, refresh once and retry the request once. If that fails, go to the login page and come back afterwards.
 - Log out with `POST /api/auth/logout`, which ends the session and clears the cookie.
 - Staff accounts can shop like anyone else. Admin work belongs in `simple-vite`.
 - Login and registration return `429` after repeated attempts. Show a "try again later" message.
+
+## Password Reset
+
+The storefront has its own reset pages, separate from the admin's. They are static pages, so loading them calls no API.
+
+- `/forgot-password` sends `POST /api/auth/forgot-password` with the email and `app: 'storefront'`. It always answers `202`, so always show "If that email has an account, we sent a link", which reveals nothing about which emails have accounts.
+- The backend emails a link to `<STOREFRONT_URL>/reset-password#token=<token>`. The token is in the fragment, so it never reaches the Next.js server, Caddy's logs, or another site.
+- `/reset-password` reads the token from `location.hash`, then removes it from the address bar with `history.replaceState`. Without a token, it shows that the link is invalid, with a link to request a new one.
+- The form sends `POST /api/auth/reset-password` with `{ token, newPassword }`. On success, the backend ends every session, and the shopper goes to the login page.
+- Links expire after 30 minutes and work once, and only the newest one works. Both forms return `429` after repeated attempts.
+- Both pages are `noindex`, and send `Referrer-Policy: no-referrer`.
+
+This needs the backend change described in Open Questions.
 
 ## Cart
 
@@ -107,18 +121,22 @@ src/
 
 ## Checkout
 
-- `GET /api/payment-methods` lists the methods to choose from, without account details. `cod` is cash on delivery.
+- `GET /api/payment-methods` lists the methods to choose from, without account details. `cod` is cash on delivery, and is offered to accounts only, as guests cannot use it.
 - `POST /api/orders/preview` returns the total, including tax and shipping, for the shopper to confirm.
 - Placing the order sends that total as `expectedTotalCents`. If prices changed in between, the API rejects the order, and the shopper sees the new total.
 - Each checkout attempt has one `idempotencyKey`, created when the shopper reaches the final step. Retrying the same attempt reuses it, so a slow network never places two orders.
 - Accounts check out with `POST /api/orders` and a saved address. Guests use `POST /api/orders/guest` with an email and address, and get a private order link.
 - With a manual method, the order is `awaiting_payment`, and shows the account to pay and the deadline. The shopper pays outside the store, then submits the reference.
 - Failed checkouts return `details` for the affected items, such as out of stock. Show them next to those items.
+- After the order is placed, the confirmation page shows the order, and for a manual method, the account to pay and the deadline. For a guest, saving the order link is its main step.
 
 ## Guest Orders
 
-- A guest order is reached through a link holding a signed token, such as `/orders/guest/<token>`. Anyone with the link can see the order, so treat it like a password.
-- Keep these pages out of search engines, and set `Referrer-Policy: no-referrer` on them, so that the token never leaks to another site.
+- A guest order is reached through a link holding a signed token, at `/orders/guest#token=<token>`. Anyone with the link can see the order, so treat it like a password.
+- The token is in the fragment, so it never reaches the Next.js server, Caddy's logs, or another site. The page reads it from `location.hash`.
+- The backend returns `guestToken` only once, when the order is placed, and does not email it. The confirmation page shows the link with a copy button, and warns that it is the only way back to the order.
+- The link is not kept in `localStorage`, which holds only the guest cart.
+- Keep these pages out of search engines, and set `Referrer-Policy: no-referrer` on them.
 - Never log the link or send it to analytics.
 - Guest orders are never linked to accounts.
 
@@ -143,7 +161,7 @@ src/
 ## Data Fetching and Caching
 
 - Server pages fetch through the helpers in `src/lib/`, which are marked `server-only`.
-- Public data is cached for a short time with `revalidate`, as prices and stock change. A product page shows availability from the API, and checkout checks it again.
+- Public data is cached for 60 seconds with `revalidate`, as prices and stock change. A product page shows availability from the API, and checkout checks it again.
 - A product, category, or blog the API cannot find returns `notFound()`, so the page answers `404`.
 - In the browser, each feature keeps its query and mutation hooks in `features/<name>/api.ts`.
 - Query keys start with the feature name, such as `['cart']` or `['orders', filters]`.
@@ -178,10 +196,14 @@ Tests run with Vitest and React Testing Library. They render components as a use
 
 - `npm run build` creates the production build, and `npm start` serves it.
 - Run it on the same Ubuntu server setup as the backend, behind Caddy, which handles HTTPS.
-- Set security headers, including a Content Security Policy. Its `img-src` must allow the origin of uploaded images, which is the API or the S3 public URL, and `connect-src` must allow the API.
+- Set security headers in `next.config.ts`, including a Content Security Policy:
+  - `script-src 'self' 'unsafe-inline'`, as Next.js needs inline scripts. A nonce would make every page render per request, and lose the cached public pages. React escapes API data and the app never inserts HTML, which keeps the risk low.
+  - `img-src` allows only the origin of uploaded images, which is the API or the S3 public URL, and `connect-src` allows only the API.
+  - `frame-ancestors 'none'`, `base-uri 'self'`, and `form-action 'self'`.
 - Never use the development server in production.
 
 ## Open Questions
 
 - The API addresses products, categories, and blogs by UUID only, so their URLs would be `/products/<uuid>`. Readable URLs, such as `/products/classic-t-shirt`, need slugs added to the backend first.
 - The store's logo and theme are not decided yet.
+- The backend has one `PASSWORD_RESET_URL`, so the storefront and the admin cannot each have their own reset page yet. `simple-express` needs to replace it with `STOREFRONT_URL` and `ADMIN_URL`, and take `app: 'storefront' | 'admin'` on `POST /api/auth/forgot-password` to choose between them.

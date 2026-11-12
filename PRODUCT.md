@@ -29,8 +29,9 @@ The storefront holds no business rules. The backend owns prices, stock, tax, shi
 
 - Planned: browsing by category, product pages with up to two options, search, a cart, guest and account checkout, addresses, order history, payment reference submission, guest order links, password reset, and blogs.
 - Guests keep their cart on their device, and it moves to their account when they log in.
-- A guest can order at most 10 items, and has a limit on unpaid orders.
-- Guest order links do not expire. Once an order is finished, its page hides the shipping address.
+- A guest can order at most 10 items, and has a limit on unpaid orders. Guests pay with a manual method, as cash on delivery is for accounts only.
+- Guest order links do not expire, and are not emailed. The confirmation page is the only place a guest gets the link, so it must make saving it clear. Once an order is finished, its page hides the shipping address.
+- The storefront has its own login and password reset pages, separate from the admin's.
 - Prices, totals, and stock come from the API at the time they are shown, and the total is checked again when the order is placed.
 - The backend's error messages are shown as they are.
 
