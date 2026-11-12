@@ -2,11 +2,11 @@
 
 ## Overview
 
-This is the customer storefront, built with Next.js, React, and TypeScript, using the App Router. It sells through the `simple-express` API, and holds no business rules of its own.
+This is the customer storefront, built with Next.js 16, React, and TypeScript, using the App Router with Cache Components. It sells through the `simple-express` API, and holds no business rules of its own.
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: planned. Nothing below is built yet.
+Status: the project is set up, with the API clients, configuration, and app shell. The pages are not built yet.
 
 ## Request Lifecycle
 
@@ -162,8 +162,8 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 
 ## Data Fetching and Caching
 
-- Server pages fetch through the helpers in `src/lib/`, which are marked `server-only`.
-- Public data is cached for 60 seconds with `revalidate`, as prices and stock change. A product page shows availability from the API, and checkout checks it again.
+- Server pages fetch through `getPublic` in `src/lib/server-api.ts`, which is marked `server-only`.
+- Public data is cached for 60 seconds with `'use cache'` and `cacheLife`, as prices and stock change. Cache Components replaces the `revalidate` segment option. Errors are never cached. A product page shows availability from the API, and checkout checks it again.
 - A product, category, or blog the API cannot find returns `notFound()`, so the page answers `404`.
 - In the browser, each feature keeps its query and mutation hooks in `features/<name>/api.ts`.
 - Query keys start with the feature name, such as `['cart']` or `['orders', filters]`.

@@ -3,8 +3,6 @@
 
 ## Commands
 
-Not scaffolded yet. Once it is:
-
 ```bash
 npm run dev            # http://localhost:3001
 npm run typecheck
