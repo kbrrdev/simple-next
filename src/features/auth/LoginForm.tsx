@@ -6,7 +6,7 @@ import { useState, type FormEvent } from 'react';
 import { Field } from '@/components/Field';
 import { Button } from '@/components/ui/button';
 import { useLogin } from './api';
-import { fieldError, formError } from './errors';
+import { fieldError, formError } from '@/lib/form-errors';
 import { safeNext } from './redirect';
 
 export function LoginForm() {

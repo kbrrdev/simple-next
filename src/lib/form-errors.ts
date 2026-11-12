@@ -1,4 +1,4 @@
-import { ApiError, errorMessage } from '@/lib/api';
+import { ApiError, errorMessage } from './api';
 
 /** The backend's message for one field, shown next to it. */
 export function fieldError(error: Error | null, field: string) {
