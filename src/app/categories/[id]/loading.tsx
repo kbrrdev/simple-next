@@ -1,5 +1,5 @@
-import { Loading } from '@/components/Loading';
+import { ProductListPageSkeleton } from '@/components/skeletons';
 
 export default function CategoryLoading() {
-  return <Loading label="Loading products..." />;
+  return <ProductListPageSkeleton />;
 }

@@ -1,5 +1,5 @@
-import { Loading } from '@/components/Loading';
+import { BlogListSkeleton } from '@/components/skeletons';
 
 export default function BlogsLoading() {
-  return <Loading label="Loading posts..." />;
+  return <BlogListSkeleton />;
 }

@@ -1,5 +1,5 @@
-import { Loading } from '@/components/Loading';
+import { ProductPageSkeleton } from '@/components/skeletons';
 
 export default function ProductLoading() {
-  return <Loading label="Loading product..." />;
+  return <ProductPageSkeleton />;
 }

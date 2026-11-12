@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Field } from '@/components/Field';
 import { Loading } from '@/components/Loading';
+import { CardListSkeleton, CheckoutSkeleton } from '@/components/skeletons';
 import { OrderTotals } from '@/components/OrderTotals';
 import { Button } from '@/components/ui/button';
 import { useAddresses, useCreateAddress } from '@/features/addresses/api';
@@ -68,7 +69,7 @@ export function CheckoutView() {
   const placeAccountOrder = usePlaceAccountOrder();
   const placeGuestOrder = usePlaceGuestOrder();
 
-  if (session.isPending || cartPending) return <Loading label="Loading checkout..." />;
+  if (session.isPending || cartPending) return <CheckoutSkeleton />;
   if (cartError) {
     return (
       <p role="alert" className="text-destructive">
@@ -212,7 +213,7 @@ export function CheckoutView() {
         </Section>
 
         <Section title="Shipping address">
-          {user && addresses.isPending && <Loading label="Loading your addresses..." />}
+          {user && addresses.isPending && <CardListSkeleton label="Loading your addresses" />}
           {user && addresses.error && (
             <p role="alert" className="text-destructive">
               Your addresses could not be loaded. {errorMessage(addresses.error)}
@@ -253,7 +254,7 @@ export function CheckoutView() {
         </Section>
 
         <Section title="Payment">
-          {paymentMethods.isPending && <Loading label="Loading payment methods..." />}
+          {paymentMethods.isPending && <CardListSkeleton label="Loading payment methods" />}
           {paymentMethods.error && (
             <p role="alert" className="text-destructive">
               Payment methods could not be loaded. {errorMessage(paymentMethods.error)}
