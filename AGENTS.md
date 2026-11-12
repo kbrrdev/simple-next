@@ -127,7 +127,7 @@ Follow the Cart, Checkout, and Guest Orders sections of `docs/architecture.md`. 
 - Refresh the session through the `httpOnly` cookie, with `credentials: 'include'`.
 - On a `401`, refresh once and retry the request once. If that fails, send the user to log in.
 - Guest order and password reset tokens go in the URL fragment, after `#`, so that they never reach a server. Never log them, never send them to analytics, and keep those pages out of search engines.
-- The storefront and the admin are always separate apps, with their own login and password reset pages.
+- The storefront and the admin are always separate apps, with their own login pages.
 - Render API data as text. Never insert it as HTML.
 - Never log tokens, passwords, or personal data to the console.
 

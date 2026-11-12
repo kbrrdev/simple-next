@@ -80,7 +80,7 @@ src/
 | Order confirmation | Browser  | None. It shows the order the checkout just placed                                                      |
 | Guest order link   | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
 | Login and register | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
-| Password reset     | Static   | `POST /api/auth/forgot-password`, `/reset-password`, sent only when the form is submitted              |
+| Password reset     | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
 | Account            | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
 | Addresses          | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
 | Orders             | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
@@ -97,18 +97,20 @@ src/
 - Staff accounts can shop like anyone else. Admin work belongs in `simple-vite`.
 - Login and registration return `429` after repeated attempts. Show a "try again later" message.
 
-## Password Reset
+## Password Reset (Later)
 
-The storefront has its own reset pages, separate from the admin's. They are static pages, so loading them calls no API.
+Postponed. This is the planned design, kept for when it is built.
 
-- `/forgot-password` sends `POST /api/auth/forgot-password` with the email and `app: 'storefront'`. It always answers `202`, so always show "If that email has an account, we sent a link", which reveals nothing about which emails have accounts.
-- The backend emails a link to `<STOREFRONT_URL>/reset-password#token=<token>`. The token is in the fragment, so it never reaches the Next.js server, Caddy's logs, or another site.
+The storefront has its own reset pages. They are static pages, so loading them calls no API.
+
+- `/forgot-password` sends `POST /api/auth/forgot-password` with the email. It always answers `202`, so always show "If that email has an account, we sent a link", which reveals nothing about which emails have accounts.
+- The backend emails a link to `<PASSWORD_RESET_URL>#token=<token>`. The token is in the fragment, so it never reaches the Next.js server, Caddy's logs, or another site.
 - `/reset-password` reads the token from `location.hash`, then removes it from the address bar with `history.replaceState`. Without a token, it shows that the link is invalid, with a link to request a new one.
 - The form sends `POST /api/auth/reset-password` with `{ token, newPassword }`. On success, the backend ends every session, and the shopper goes to the login page.
 - Links expire after 30 minutes and work once, and only the newest one works. Both forms return `429` after repeated attempts.
 - Both pages are `noindex`, and send `Referrer-Policy: no-referrer`.
 
-This needs the backend change described in Open Questions.
+Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefront, such as `http://localhost:3001/reset-password`. It points at the admin by default, which has no reset page. The admin needs none, as staff do not reset their own passwords, so the backend only ever needs this one address.
 
 ## Cart
 
@@ -206,4 +208,4 @@ Tests run with Vitest and React Testing Library. They render components as a use
 
 - The API addresses products, categories, and blogs by UUID only, so their URLs would be `/products/<uuid>`. Readable URLs, such as `/products/classic-t-shirt`, need slugs added to the backend first.
 - The store's logo and theme are not decided yet.
-- The backend has one `PASSWORD_RESET_URL`, so the storefront and the admin cannot each have their own reset page yet. `simple-express` needs to replace it with `STOREFRONT_URL` and `ADMIN_URL`, and take `app: 'storefront' | 'admin'` on `POST /api/auth/forgot-password` to choose between them.
+- Password reset is postponed. See Password Reset for the planned design and the backend setting it needs.
