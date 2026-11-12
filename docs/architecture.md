@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, a basic account page, the cart, checkout, and read-only order pages are built. The order list, payment submission, cancelling, and address management are not built yet.
+Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built. Security headers are not set yet.
 
 ## Request Lifecycle
 
@@ -68,22 +68,22 @@ src/
 
 ## Pages and Backend Modules
 
-| Page                         | Rendered | Backend routes                                                                                         |
-| ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| Home `/`                     | Server   | `GET /api/products`, `GET /api/categories/tree`                                                        |
-| Category `/categories/<id>`  | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
-| Search `/search?q=`          | Server   | `GET /api/products?search=`                                                                            |
-| Product `/products/<id>`     | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
-| Blog `/blogs`, `/blogs/<id>` | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
-| Cart `/cart`                 | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
-| Checkout `/checkout`         | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
-| Order `/orders/<id>`         | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                         |
-| `/orders/guest#token=`       | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
-| `/login`, `/register`        | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
-| Password reset               | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
-| Account `/account`           | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
-| Addresses                    | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
-| Orders                       | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
+| Page                              | Rendered | Backend routes                                                                                         |
+| --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| Home `/`                          | Server   | `GET /api/products`, `GET /api/categories/tree`                                                        |
+| Category `/categories/<id>`       | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
+| Search `/search?q=`               | Server   | `GET /api/products?search=`                                                                            |
+| Product `/products/<id>`          | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
+| Blog `/blogs`, `/blogs/<id>`      | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
+| Cart `/cart`                      | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
+| Checkout `/checkout`              | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
+| Order `/orders/<id>`              | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                         |
+| `/orders/guest#token=`            | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
+| `/login`, `/register`             | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
+| Password reset                    | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
+| `/account`, `/account/security`   | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
+| `/account/addresses`              | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
+| `/account/orders`, `/orders/<id>` | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
 
 ## Authentication
 
@@ -140,7 +140,7 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 - The address form checks required fields, the Philippine mobile number, and the 4-digit postal code as hints. The backend's field errors, named `phone` or `address.phone`, show next to the fields.
 - With a manual method, the order is `awaiting_payment`, and shows the account to pay and the deadline. The shopper pays outside the store, then submits the reference.
 - Failed checkouts return `details` for the affected items, such as out of stock, named by `variantId`. They show next to those items. After any failure, the preview is loaded again, so the shopper sees the current total.
-- After the order is placed, accounts go to `/orders/<id>`, and guests to `/orders/guest#token=<token>`. Both show the order through `OrderDetails`: the status, the items and totals, the account to pay and the deadline for a manual method, and the shipping address. Payment submission and cancelling come later.
+- After the order is placed, accounts go to `/orders/<id>`, and guests to `/orders/guest#token=<token>`. Both show the order through `OrderDetails`: the status, the items and totals, the account to pay and the deadline for a manual method, and the shipping address. The order page also takes the payment reference while a manual payment is unpaid, and offers cancelling while the API allows it.
 
 ## Guest Orders
 
@@ -152,6 +152,16 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 - The guest order page always shows the link with a copy button, as the shopper may open it again from the confirmation.
 - Never log the link or send it to analytics.
 - Guest orders are never linked to accounts.
+
+## Account
+
+- The account pages share a menu: Overview, Orders, Addresses, and Security. Each page guards itself with `RequireAuth`, rather than the layout, so that Next.js can check every page for instant navigation.
+- `/account/orders` keeps the status filter and page number in the URL. An unknown status shows every order.
+- The payment reference form checks for 4 to 100 letters, numbers, or hyphens as a hint, and shows the API's message, such as a reference already used. Guests send theirs from the guest order page, with the token.
+- Cancelling is offered while the order is `pending`, or waiting for an unpaid payment, mirroring the API. Guests cannot cancel.
+- Cancelling, deleting an address, and logging out everywhere ask first, in a dialog.
+- Changing the password keeps this session, and the API ends the others. Logging out everywhere ends every session, then clears the local session and goes home. If it fails, the shopper stays logged in, to try again.
+- An account can save up to 20 addresses. Deleting the default makes another one the default.
 
 ## Talking to the API
 

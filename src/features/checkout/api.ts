@@ -7,11 +7,8 @@ import type { AddressInput } from './address';
 
 export type PaymentMethodOption = Schemas['PaymentMethodOption'];
 export type OrderPreview = Schemas['OrderPreview'];
-export type Address = Schemas['Address'];
 type Order = Schemas['Order'];
 type GuestOrder = Schemas['GuestOrder'];
-
-const addressesKey = ['addresses'];
 
 export function usePaymentMethods() {
   return useQuery({
@@ -20,32 +17,6 @@ export function usePaymentMethods() {
       const { data } = await request<{ data: PaymentMethodOption[] }>('/api/payment-methods');
       return data;
     },
-  });
-}
-
-export function useAddresses(enabled: boolean) {
-  return useQuery({
-    queryKey: addressesKey,
-    queryFn: async () => {
-      const { data } = await request<{ data: Address[] }>('/api/addresses');
-      return data;
-    },
-    enabled,
-  });
-}
-
-export function useCreateAddress() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (address: AddressInput) => {
-      const { data } = await request<{ data: Address }>('/api/addresses', {
-        method: 'POST',
-        body: address,
-      });
-      return data;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: addressesKey }),
   });
 }
 
