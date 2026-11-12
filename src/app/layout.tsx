@@ -6,6 +6,7 @@ import { Providers } from '@/components/providers';
 import { SearchForm } from '@/components/SearchForm';
 import { env } from '@/config/env';
 import { AccountLink } from '@/features/auth/AccountLink';
+import { CartLink } from '@/features/cart/CartLink';
 import '@/styles/globals.css';
 
 const geist = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
                 {/* Reads the current path, which is only known per request. */}
                 <Suspense>
                   <AccountLink />
+                  <CartLink />
                 </Suspense>
               </nav>
             </div>

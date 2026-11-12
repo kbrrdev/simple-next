@@ -1,37 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { usePathname } from 'next/navigation';
-import { refreshSession, request, setAccessToken, type Schemas } from '@/lib/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { mergeGuestCart } from '@/features/cart/api';
+import { request, setAccessToken } from '@/lib/api';
+import { sessionKey, type User } from './session';
 
-export type User = Schemas['User'];
+export { sessionKey, useSession, type User } from './session';
 
 interface Credentials {
   email: string;
   password: string;
-}
-
-export const sessionKey = ['session'];
-
-// These pages work without a session, so they skip the request that restores it.
-const pagesWithoutSession = ['/login', '/register'];
-
-/** The logged-in user, or null. On first load, the refresh cookie restores the session. */
-async function loadSession(): Promise<User | null> {
-  if (!(await refreshSession())) return null;
-
-  const { data } = await request<{ data: User }>('/api/auth/me');
-  return data;
-}
-
-export function useSession() {
-  const pathname = usePathname();
-
-  return useQuery({
-    queryKey: sessionKey,
-    queryFn: loadSession,
-    staleTime: Infinity,
-    retry: false,
-    enabled: !pagesWithoutSession.includes(pathname),
-  });
 }
 
 function login(credentials: Credentials) {
@@ -41,31 +17,33 @@ function login(credentials: Credentials) {
   });
 }
 
-export function useLogin() {
+/** Starts the session, then moves the guest cart into the account before moving on. */
+function useStartSession() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: login,
-    onSuccess: ({ data }) => {
-      setAccessToken(data.accessToken);
-      queryClient.setQueryData(sessionKey, data.user);
-    },
-  });
+  return async ({ data }: { data: { user: User; accessToken: string } }) => {
+    setAccessToken(data.accessToken);
+    queryClient.setQueryData(sessionKey, data.user);
+    await mergeGuestCart(queryClient);
+  };
+}
+
+export function useLogin() {
+  const startSession = useStartSession();
+
+  return useMutation({ mutationFn: login, onSuccess: startSession });
 }
 
 /** Registers, then logs in, as registering returns no session. */
 export function useRegister() {
-  const queryClient = useQueryClient();
+  const startSession = useStartSession();
 
   return useMutation({
     mutationFn: async (credentials: Credentials) => {
       await request('/api/auth/register', { method: 'POST', body: credentials });
       return login(credentials);
     },
-    onSuccess: ({ data }) => {
-      setAccessToken(data.accessToken);
-      queryClient.setQueryData(sessionKey, data.user);
-    },
+    onSuccess: startSession,
   });
 }
 
