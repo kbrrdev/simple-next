@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, categories, search, products, and blogs. The cart, checkout, and account pages are not built yet.
+Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, and a basic account page are built. The cart, checkout, and the rest of the account pages are not built yet.
 
 ## Request Lifecycle
 
@@ -79,9 +79,9 @@ src/
 | Checkout                     | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
 | Order confirmation           | Browser  | None. It shows the order the checkout just placed                                                      |
 | Guest order link             | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
-| Login and register           | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
+| `/login`, `/register`        | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
 | Password reset               | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
-| Account                      | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
+| Account `/account`           | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
 | Addresses                    | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
 | Orders                       | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
 
@@ -92,8 +92,11 @@ src/
 - The refresh token is an `httpOnly` cookie named `refreshToken`, limited to the `/api/auth` path on the API's domain. JavaScript cannot read it, and the Next.js server never receives it.
 - Call `POST /api/auth/refresh` with an empty body and `credentials: 'include'`. It returns a new access token and rotates the cookie.
 - On page load, call refresh once to restore the session, as memory is cleared. A shopper who is not logged in gets a `401`, which is normal. The login, register, forgot password, and reset password pages skip it, as they do not need a session.
-- On a `401`, refresh once and retry the request once. If that fails, go to the login page and come back afterwards.
-- Log out with `POST /api/auth/logout`, which ends the session and clears the cookie.
+- The session lives in the `['session']` query, from `useSession` in `src/features/auth/api.ts`. The header's account link reads it, so the session is restored on every page that shows the header.
+- On a `401`, refresh once and retry the request once. If that fails, the session ends, and `RequireAuth` sends the shopper to `/login?next=<page>`.
+- After logging in, the shopper returns to `next`. Only paths on this site are accepted, starting with a single `/`, so that a link cannot send the shopper to another site.
+- `POST /api/auth/register` returns the user but no session, so the storefront logs in with the same details right after.
+- Log out with `POST /api/auth/logout`, which ends the session and clears the cookie. The storefront clears its token and cached personal data even if the request fails.
 - Staff accounts can shop like anyone else. Admin work belongs in `simple-vite`.
 - Login and registration return `429` after repeated attempts. Show a "try again later" message.
 

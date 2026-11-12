@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { Providers } from '@/components/providers';
 import { SearchForm } from '@/components/SearchForm';
 import { env } from '@/config/env';
+import { AccountLink } from '@/features/auth/AccountLink';
 import '@/styles/globals.css';
 
 const geist = Geist({
@@ -27,12 +29,16 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
               <Link href="/" className="font-semibold">
                 {env.storeName}
               </Link>
-              <nav aria-label="Main" className="text-sm">
+              <SearchForm />
+              <nav aria-label="Main" className="flex gap-4 text-sm">
                 <Link href="/blogs" className="hover:underline">
                   Blog
                 </Link>
+                {/* Reads the current path, which is only known per request. */}
+                <Suspense>
+                  <AccountLink />
+                </Suspense>
               </nav>
-              <SearchForm />
             </div>
           </header>
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
