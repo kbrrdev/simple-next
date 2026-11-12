@@ -4,7 +4,7 @@ The customer storefront for the [simple-express](https://github.com/kbrrdev/simp
 
 See [docs/architecture.md](docs/architecture.md) for how it works, and [PRODUCT.md](PRODUCT.md) for who it is for.
 
-**Status:** the project is set up, and the store pages are not built yet. The documents describe the intended design.
+**Status:** the public catalog is built. The cart, checkout, and account pages are not built yet. The documents describe the intended design.
 
 ## Setup
 
@@ -15,6 +15,8 @@ npm install
 cp .env.example .env
 npm run dev
 ```
+
+The production build prerenders pages from the API, so the API must be running when you run `npm run build`.
 
 The app runs at `http://localhost:3001`, as the API uses port 3000. Add `http://localhost:3001` to the backend's `CORS_ORIGINS`, which only allows the admin app by default.
 

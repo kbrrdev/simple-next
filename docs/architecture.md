@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the project is set up, with the API clients, configuration, and app shell. The pages are not built yet.
+Status: the public catalog is built: home, categories, search, products, and blogs. The cart, checkout, and account pages are not built yet.
 
 ## Request Lifecycle
 
@@ -68,22 +68,22 @@ src/
 
 ## Pages and Backend Modules
 
-| Page               | Rendered | Backend routes                                                                                         |
-| ------------------ | -------- | ------------------------------------------------------------------------------------------------------ |
-| Home               | Server   | `GET /api/products`, `GET /api/categories/tree`                                                        |
-| Category           | Server   | `GET /api/categories/:id`, `GET /api/products?categoryId=`                                             |
-| Search             | Server   | `GET /api/products?search=`                                                                            |
-| Product            | Server   | `GET /api/products/:id`                                                                                |
-| Blog               | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
-| Cart               | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
-| Checkout           | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
-| Order confirmation | Browser  | None. It shows the order the checkout just placed                                                      |
-| Guest order link   | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
-| Login and register | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
-| Password reset     | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
-| Account            | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
-| Addresses          | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
-| Orders             | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
+| Page                         | Rendered | Backend routes                                                                                         |
+| ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| Home `/`                     | Server   | `GET /api/products`, `GET /api/categories/tree`                                                        |
+| Category `/categories/<id>`  | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
+| Search `/search?q=`          | Server   | `GET /api/products?search=`                                                                            |
+| Product `/products/<id>`     | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
+| Blog `/blogs`, `/blogs/<id>` | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
+| Cart                         | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
+| Checkout                     | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
+| Order confirmation           | Browser  | None. It shows the order the checkout just placed                                                      |
+| Guest order link             | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
+| Login and register           | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
+| Password reset               | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
+| Account                      | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
+| Addresses                    | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
+| Orders                       | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
 
 ## Authentication
 
@@ -164,16 +164,22 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 
 - Server pages fetch through `getPublic` in `src/lib/server-api.ts`, which is marked `server-only`.
 - Public data is cached for 60 seconds with `'use cache'` and `cacheLife`, as prices and stock change. Cache Components replaces the `revalidate` segment option. Errors are never cached. A product page shows availability from the API, and checkout checks it again.
-- A product, category, or blog the API cannot find returns `notFound()`, so the page answers `404`.
+- Pages that depend on the URL, such as a product, a category, or search results, send their outline first, then stream in the content behind a `loading.tsx`. The first visit to a URL stores the finished page for the next visitors.
+- A product, category, or blog that does not exist, or an ID that is not a UUID, calls `notFound()`. As the outline was already sent, the page shows "Page not found" and is marked `noindex`, but answers `200`, for search engines too. Search engines skip `noindex` pages, so they stay out of search results.
+- Category pages find the category in the cached category tree, rather than calling `GET /api/categories/:id`, as the tree also holds its subcategories.
+- Page numbers, sort orders, and search text in the URL are checked before use. Anything invalid falls back to the default.
+- `npm run build` prerenders the home page and the sitemap, so the API must be reachable when building.
 - In the browser, each feature keeps its query and mutation hooks in `features/<name>/api.ts`.
 - Query keys start with the feature name, such as `['cart']` or `['orders', filters]`.
 - After a mutation, invalidate the queries it affects.
 
 ## Search Engines
 
-- Every public page sets its title and description with the Metadata API, and product pages add their image.
+- Every public page sets its title and description with the Metadata API, and product and blog pages add their image.
+- Search results are `noindex`, as they repeat the product and category pages.
+- `sitemap.xml` lists the home page, categories, products, and blogs, and `robots.txt` points to it.
 - Personal pages, guest order links, and password reset pages are marked `noindex`.
-- Images use `next/image`, and `next.config.ts` allows only the API's or the storage's image host.
+- Images use `next/image`, and `next.config.ts` allows only the API's `/uploads` path and `NEXT_PUBLIC_IMAGE_URL`. Next.js refuses images from private addresses, so it allows them only when the API runs on `localhost`, as when developing.
 
 ## Styling
 
@@ -186,7 +192,9 @@ Configuration comes from environment variables, documented in `.env.example` and
 
 - `NEXT_PUBLIC_API_URL` is the simple-express API, and is required.
 - `API_URL` is the API's address for the Next.js server, if it differs. It stays on the server.
+- `NEXT_PUBLIC_SITE_URL` is the storefront's own address, used in the sitemap and in links shared on social media, and is required.
 - `NEXT_PUBLIC_STORE_NAME` is shown in the header and page titles.
+- `NEXT_PUBLIC_IMAGE_URL` is the public address of uploaded images when the API stores them in S3, matching its `S3_PUBLIC_URL`.
 
 Variables starting with `NEXT_PUBLIC_` are built into the bundle, so they are public.
 
@@ -196,7 +204,7 @@ Tests run with Vitest and React Testing Library. They render components as a use
 
 ## Build and Deployment
 
-- `npm run build` creates the production build, and `npm start` serves it.
+- `npm run build` creates the production build, and `npm start` serves it. The build calls the API, so build where the API is reachable.
 - Run it on the same Ubuntu server setup as the backend, behind Caddy, which handles HTTPS.
 - Set security headers in `next.config.ts`, including a Content Security Policy:
   - `script-src 'self' 'unsafe-inline'`, as Next.js needs inline scripts. A nonce would make every page render per request, and lose the cached public pages. React escapes API data and the app never inserts HTML, which keeps the risk low.
@@ -206,6 +214,6 @@ Tests run with Vitest and React Testing Library. They render components as a use
 
 ## Open Questions
 
-- The API addresses products, categories, and blogs by UUID only, so their URLs would be `/products/<uuid>`. Readable URLs, such as `/products/classic-t-shirt`, need slugs added to the backend first.
+- The API addresses products, categories, and blogs by UUID only, so their URLs are `/products/<uuid>`. Readable URLs, such as `/products/classic-t-shirt`, need slugs added to the backend first.
 - The store's logo and theme are not decided yet.
 - Password reset is postponed. See Password Reset for the planned design and the backend setting it needs.
