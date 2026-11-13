@@ -73,32 +73,35 @@ export function ProductListPageSkeleton() {
   );
 }
 
-/** The same two columns as the product page. */
+/** The product listing: the heading and photos, then the details beside the purchase card. */
 export function ProductPageSkeleton() {
   return (
-    <Loading label="Loading product" className="grid gap-8 md:grid-cols-2">
-      <Skeleton className="aspect-square" />
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-3/4" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-32" />
+    <Loading label="Loading product" className="-mt-6 md:mt-0">
+      <div className="flex flex-col">
+        <div className="order-2 space-y-2 pt-6 md:order-1 md:pt-0 md:pb-6">
           <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-8 w-2/3 md:w-1/3" />
         </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-16" />
-          <div className="flex gap-2">
-            {repeat(3).map((index) => (
-              <Skeleton key={index} className="h-9 w-12" />
-            ))}
+        <Skeleton className="order-1 -mx-6 aspect-square rounded-none md:order-2 md:mx-0 md:aspect-auto md:h-[min(28rem,50vh)] md:rounded-xl" />
+      </div>
+      <div className="grid gap-x-16 pt-6 md:grid-cols-[1fr_minmax(20rem,24rem)] md:pt-12 lg:gap-x-24">
+        <div className="space-y-6 pb-8 md:col-start-2 md:row-start-1 md:rounded-xl md:border md:border-border md:p-6">
+          <Skeleton className="h-7 w-28" />
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-20" />
+            <div className="flex gap-2">
+              {repeat(3).map((index) => (
+                <Skeleton key={index} className="h-9 w-14 rounded-full" />
+              ))}
+            </div>
           </div>
+          <Skeleton className="hidden h-12 md:block" />
         </div>
-        <Skeleton className="h-9 w-full sm:w-36" />
-        <div className="space-y-2">
+        <div className="space-y-3 md:col-start-1 md:row-start-1">
+          <Skeleton className="h-6 w-40" />
           <Skeleton className="h-4" />
           <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-2/3" />
         </div>
       </div>
     </Loading>

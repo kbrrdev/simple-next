@@ -3,7 +3,9 @@ import type { ProductVariant } from './api';
 export type VariantChoice = Pick<
   ProductVariant,
   'id' | 'option1Value' | 'option2Value' | 'priceCents' | 'stock'
->;
+> &
+  // The variant's own photo, when it has one.
+  Partial<Pick<ProductVariant, 'assetId'>>;
 
 /** The chosen value of each option. A product without that option has null. */
 export interface Selection {
