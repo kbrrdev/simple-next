@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AccountRoute() {
   return (
-    <AccountPage title="Account">
+    <AccountPage title="Account" subpage={false}>
       <AccountSummary />
     </AccountPage>
   );

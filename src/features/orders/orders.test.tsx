@@ -93,6 +93,37 @@ describe('OrderDetails', () => {
     expect(screen.getByText('Pay ₱1,150.00 in cash when your order arrives.')).toBeInTheDocument();
   });
 
+  it('asks for nothing once an unpaid order is cancelled', () => {
+    for (const paymentType of ['cod', 'manual'] as const) {
+      const { unmount } = render(
+        <OrderDetails
+          order={{ ...order, status: 'cancelled', paymentType, payment: null, paymentDueAt: null }}
+        />,
+      );
+
+      expect(screen.getByText('This order was cancelled, so nothing is due.')).toBeInTheDocument();
+      expect(screen.queryByText(/in cash when your order arrives/)).not.toBeInTheDocument();
+      unmount();
+    }
+  });
+
+  it('shows a cash payment as paid once collected', () => {
+    render(
+      <OrderDetails
+        order={{
+          ...order,
+          status: 'delivered',
+          paymentType: 'cod',
+          paymentStatus: 'paid',
+          payment: null,
+          paymentDueAt: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Paid')).toBeInTheDocument();
+  });
+
   it('leaves out the address once it is hidden', () => {
     render(<OrderDetails order={{ ...order, shippingAddress: null, guestToken: 'token' }} />);
 

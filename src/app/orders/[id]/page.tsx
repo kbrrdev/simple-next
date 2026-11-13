@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function OrderPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Your order</h1>
+      <h1 className="text-[1.75rem] font-semibold tracking-tight md:text-[2rem]">Your order</h1>
       {/* The order ID comes from the URL, which is only known per request. */}
       <Suspense>
         <RequireAuth>

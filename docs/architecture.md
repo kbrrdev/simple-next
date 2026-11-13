@@ -92,7 +92,8 @@ src/
 - The refresh token is an `httpOnly` cookie named `refreshToken`, limited to the `/api/auth` path on the API's domain. JavaScript cannot read it, and the Next.js server never receives it.
 - Call `POST /api/auth/refresh` with an empty body and `credentials: 'include'`. It returns a new access token and rotates the cookie.
 - On page load, call refresh once to restore the session, as memory is cleared. A shopper who is not logged in gets a `401`, which is normal. The login, register, forgot password, and reset password pages skip it, as they do not need a session.
-- The session lives in the `['session']` query, from `useSession` in `src/features/auth/api.ts`. The header's account link reads it, so the session is restored on every page that shows the header.
+- The session lives in the `['session']` query, from `useSession` in `src/features/auth/session.ts`. The header's account menu reads it, so the session is restored on every page that shows the header.
+- Parts of a page hydrate at different times, and the session can arrive in between. Until a part has hydrated, `useSession` reports the session as loading, as the server rendered it, so the browser's first render matches the server's HTML.
 - On a `401`, refresh once and retry the request once. If that fails, the session ends, and `RequireAuth` sends the shopper to `/login?next=<page>`.
 - After logging in, the shopper returns to `next`. Only paths on this site are accepted, starting with a single `/`, so that a link cannot send the shopper to another site.
 - `POST /api/auth/register` returns the user but no session, so the storefront logs in with the same details right after.
@@ -214,6 +215,7 @@ The layout follows a listings site's structure: a sticky header with the product
 - On phones, the tab bar's Search tab opens the search as a full screen, with the tab bar still above it. Tapping Search again, another tab, or any page change closes it.
 - The product page is laid out like a listing (`ProductListing`): the title above a mosaic of up to five photos, capped in height so the price shows early, with "Show all photos" opening every photo full screen. Below, the details sit beside a purchase card that stays in view. On phones the photos swipe with a counter, and a bar above the tab bar keeps the price and Add to cart in reach. The chosen variant drives the price, stock, and photos: when it has its own photo (`assetId`), that photo leads.
 - Product cards swipe through their photos on touch screens, and show arrows on hover. Photos that fail to load show a quiet placeholder through `FallbackImage`.
+- `DESIGN.md` describes the visual system: colours, type, shapes, spacing, page patterns, and components. Follow it when adding or changing a page.
 - Use Tailwind CSS utility classes. Move repeated markup into shared components rather than creating custom CSS classes.
 - shadcn/ui components are copied into `src/components/ui`, and are this project's own code. Add each one only when a page needs it.
 - Pages and sections show a skeleton from `src/components/skeletons.tsx` while they load, shaped like the content to come, so that nothing moves when it arrives. Each skeleton announces what is loading to screen readers through `role="status"`, and hides its blocks. The pulse stops for people who ask for less motion. Small inline waits, such as the checkout total, keep the `Loading` text.

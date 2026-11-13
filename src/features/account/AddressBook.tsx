@@ -53,7 +53,11 @@ function AddressEditor({ initial, saving, error, onSave, onCancel }: AddressEdit
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-4 rounded-md border p-4">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="space-y-4 rounded-xl border border-border p-5"
+    >
       <AddressForm value={address} errors={errors} onChange={setAddress} />
       {error && Object.keys(serverErrors).length === 0 && (
         <p role="alert" className="text-sm text-destructive">
@@ -119,7 +123,7 @@ export function AddressBook() {
               />
             </li>
           ) : (
-            <li key={address.id} className="space-y-3 rounded-md border p-4 text-sm">
+            <li key={address.id} className="space-y-3 rounded-xl border border-border p-5 text-sm">
               <div>
                 <p className="font-medium">
                   {address.recipientName}

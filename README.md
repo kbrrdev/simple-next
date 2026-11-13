@@ -2,7 +2,7 @@
 
 The customer storefront for the [simple-express](https://github.com/kbrrdev/simple-express) store API, built with Next.js, React, and TypeScript. The admin app is [simple-vite](https://github.com/kbrrdev/simple-vite).
 
-See [docs/architecture.md](docs/architecture.md) for how it works, and [PRODUCT.md](PRODUCT.md) for who it is for.
+See [docs/architecture.md](docs/architecture.md) for how it works, [DESIGN.md](DESIGN.md) for how it looks, and [PRODUCT.md](PRODUCT.md) for who it is for.
 
 **Status:** the storefront is built: the catalog, login, cart, checkout, orders, and account pages. Security headers are not set yet. The documents describe the design.
 

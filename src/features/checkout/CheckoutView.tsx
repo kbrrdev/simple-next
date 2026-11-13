@@ -1,6 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { Banknote, MapPin, Plus, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
@@ -8,6 +9,8 @@ import { Field } from '@/components/Field';
 import { Loading } from '@/components/Loading';
 import { CardListSkeleton, CheckoutSkeleton } from '@/components/skeletons';
 import { OrderTotals } from '@/components/OrderTotals';
+import { ChoiceCard } from '@/components/ChoiceCard';
+import { FallbackImage } from '@/components/FallbackImage';
 import { Button } from '@/components/ui/button';
 import { useAddresses, useCreateAddress } from '@/features/addresses/api';
 import { useSession } from '@/features/auth/session';
@@ -36,8 +39,11 @@ const cashOnDelivery = 'cod';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="space-y-4" aria-label={title}>
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <section
+      className="space-y-5 border-b border-hairline py-8 first:pt-0 last:border-b-0"
+      aria-label={title}
+    >
+      <h2 className="text-[1.375rem] font-semibold tracking-tight">{title}</h2>
       {children}
     </section>
   );
@@ -177,8 +183,12 @@ export function CheckoutView() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="grid gap-10 md:grid-cols-[1fr_20rem]">
-      <div className="space-y-10">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="grid gap-10 md:grid-cols-[1fr_minmax(20rem,26rem)] md:gap-16 lg:gap-24"
+    >
+      <div className="min-w-0">
         <Section title="Contact">
           {user ? (
             <p>
@@ -220,32 +230,30 @@ export function CheckoutView() {
             </p>
           )}
           {user && savedAddresses.length > 0 && (
-            <fieldset className="space-y-2">
+            <fieldset className="space-y-3">
               <legend className="sr-only">Choose an address</legend>
               {savedAddresses.map((saved) => (
-                <label key={saved.id} className="flex gap-3 rounded-md border p-3 text-sm">
-                  <input
-                    type="radio"
-                    name="address"
-                    checked={addressChoice === saved.id}
-                    onChange={() => setChosenAddressId(saved.id)}
-                  />
-                  <span>
-                    <span className="font-medium">{saved.recipientName}</span>, {saved.phone}
-                    <br />
-                    {formatAddress(saved)}
-                  </span>
-                </label>
-              ))}
-              <label className="flex gap-3 rounded-md border p-3 text-sm">
-                <input
-                  type="radio"
+                <ChoiceCard
+                  key={saved.id}
                   name="address"
-                  checked={addressChoice === newAddress}
-                  onChange={() => setChosenAddressId(newAddress)}
-                />
-                Add a new address
-              </label>
+                  checked={addressChoice === saved.id}
+                  onChange={() => setChosenAddressId(saved.id)}
+                  icon={<MapPin aria-hidden className="size-6" strokeWidth={1.5} />}
+                >
+                  <span className="block font-semibold">
+                    {saved.recipientName}, {saved.phone}
+                  </span>
+                  <span className="block text-muted-foreground">{formatAddress(saved)}</span>
+                </ChoiceCard>
+              ))}
+              <ChoiceCard
+                name="address"
+                checked={addressChoice === newAddress}
+                onChange={() => setChosenAddressId(newAddress)}
+                icon={<Plus aria-hidden className="size-6" strokeWidth={1.5} />}
+              >
+                <span className="font-semibold">Add a new address</span>
+              </ChoiceCard>
             </fieldset>
           )}
           {usesAddressForm && !(user && addresses.isPending) && (
@@ -270,18 +278,29 @@ export function CheckoutView() {
             </p>
           )}
           {paymentOptions.length > 0 && (
-            <fieldset className="space-y-2">
+            <fieldset className="space-y-3">
               <legend className="sr-only">Choose how to pay</legend>
               {paymentOptions.map((option) => (
-                <label key={option.id} className="flex gap-3 rounded-md border p-3 text-sm">
-                  <input
-                    type="radio"
-                    name="payment"
-                    checked={paymentMethod === option.id}
-                    onChange={() => setPaymentMethod(option.id)}
-                  />
-                  {option.label}
-                </label>
+                <ChoiceCard
+                  key={option.id}
+                  name="payment"
+                  checked={paymentMethod === option.id}
+                  onChange={() => setPaymentMethod(option.id)}
+                  icon={
+                    option.id === cashOnDelivery ? (
+                      <Banknote aria-hidden className="size-6" strokeWidth={1.5} />
+                    ) : (
+                      <Wallet aria-hidden className="size-6" strokeWidth={1.5} />
+                    )
+                  }
+                >
+                  <span className="block font-semibold">{option.label}</span>
+                  <span className="block text-muted-foreground">
+                    {option.id === cashOnDelivery
+                      ? 'Pay in cash when your order arrives.'
+                      : 'Pay outside the store, then send the reference.'}
+                  </span>
+                </ChoiceCard>
               ))}
               {paymentMethod && paymentMethod !== cashOnDelivery && (
                 <p className="text-sm text-muted-foreground">
@@ -296,50 +315,64 @@ export function CheckoutView() {
         </Section>
       </div>
 
-      <aside className="h-fit space-y-4 rounded-md border p-4" aria-label="Order summary">
-        <h2 className="text-lg font-semibold">Order summary</h2>
-        {preview.isPending && <Loading label="Calculating your total..." />}
-        {preview.error && (
-          <p role="alert" className="text-sm text-destructive">
-            Your total could not be calculated. {errorMessage(preview.error)}
-          </p>
-        )}
-        {preview.data && (
-          <>
-            <ul className="space-y-2 text-sm">
-              {preview.data.items.map((item) => (
-                <li key={item.variantId}>
-                  <div className="flex justify-between gap-2">
-                    <span>
-                      {item.productName} × {item.quantity}
+      <aside className="h-fit md:sticky md:top-32" aria-label="Order summary">
+        <div className="space-y-5 rounded-xl border border-border p-6 shadow-float">
+          <h2 className="text-lg font-semibold">Order summary</h2>
+          {preview.isPending && <Loading label="Calculating your total..." />}
+          {preview.error && (
+            <p role="alert" className="text-sm text-destructive">
+              Your total could not be calculated. {errorMessage(preview.error)}
+            </p>
+          )}
+          {preview.data && (
+            <>
+              <ul className="space-y-4 border-b border-hairline pb-5 text-sm">
+                {preview.data.items.map((item) => (
+                  <li key={item.variantId} className="flex gap-3">
+                    <span className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      {item.imageUrl && (
+                        <FallbackImage
+                          src={item.imageUrl}
+                          alt=""
+                          fill
+                          sizes="56px"
+                          iconClassName="size-4"
+                          className="object-cover"
+                        />
+                      )}
                     </span>
-                    <span>{formatCents(item.lineTotalCents)}</span>
-                  </div>
-                  {itemErrors.has(item.variantId) && (
-                    <p className="text-destructive">{itemErrors.get(item.variantId)}</p>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <OrderTotals {...preview.data} />
-          </>
-        )}
-        {failure && !hasFieldErrors && (
-          <p role="alert" className="text-sm text-destructive">
-            {formError(failure)}
-          </p>
-        )}
-        {failure && hasFieldErrors && (
-          <p role="alert" className="text-sm text-destructive">
-            {failure.message} Check the marked details.
-          </p>
-        )}
-        <Button type="submit" size="lg" className="w-full" disabled={!canPlace}>
-          {busy ? 'Placing your order...' : 'Place order'}
-        </Button>
-        <Link href="/cart" className="block text-center text-sm underline">
-          Back to cart
-        </Link>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex justify-between gap-2">
+                        <span className="font-semibold">{item.productName}</span>
+                        <span className="tabular-nums">{formatCents(item.lineTotalCents)}</span>
+                      </span>
+                      <span className="block text-muted-foreground">Qty {item.quantity}</span>
+                      {itemErrors.has(item.variantId) && (
+                        <span className="block text-destructive">
+                          {itemErrors.get(item.variantId)}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <OrderTotals {...preview.data} />
+            </>
+          )}
+          {failure && !hasFieldErrors && (
+            <p role="alert" className="text-sm text-destructive">
+              {formError(failure)}
+            </p>
+          )}
+          {failure && hasFieldErrors && (
+            <p role="alert" className="text-sm text-destructive">
+              {failure.message} Check the marked details.
+            </p>
+          )}
+          <Button type="submit" size="lg" className="w-full" disabled={!canPlace}>
+            {busy ? 'Placing your order...' : 'Place order'}
+          </Button>
+        </div>
       </aside>
     </form>
   );

@@ -151,7 +151,7 @@ describe('guest cart page', () => {
   it('shows an empty cart without asking the API', async () => {
     renderWithQuery(<CartView />);
 
-    expect(await screen.findByText('Your cart is empty.')).toBeInTheDocument();
+    expect(await screen.findByText('Your cart is empty')).toBeInTheDocument();
     expect(request).not.toHaveBeenCalled();
   });
 

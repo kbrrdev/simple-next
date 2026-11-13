@@ -119,8 +119,8 @@ describe('guest checkout', () => {
     });
     renderWithQuery(<CheckoutView />);
 
-    expect(await screen.findByRole('radio', { name: 'GCash' })).toBeInTheDocument();
-    expect(screen.queryByRole('radio', { name: 'Cash on delivery' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('radio', { name: /^GCash/ })).toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: /^Cash on delivery/ })).not.toBeInTheDocument();
     expect(await screen.findByText('₱1,150.00')).toBeInTheDocument();
     expect(screen.getByText('Includes VAT (12%)')).toBeInTheDocument();
   });
@@ -133,7 +133,7 @@ describe('guest checkout', () => {
     });
     renderWithQuery(<CheckoutView />);
 
-    await userEvent.click(await screen.findByRole('radio', { name: 'GCash' }));
+    await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
@@ -152,7 +152,7 @@ describe('guest checkout', () => {
     renderWithQuery(<CheckoutView />);
 
     await fillGuestDetails();
-    await userEvent.click(await screen.findByRole('radio', { name: 'GCash' }));
+    await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
@@ -191,7 +191,7 @@ describe('guest checkout', () => {
     renderWithQuery(<CheckoutView />);
 
     await fillGuestDetails();
-    await userEvent.click(await screen.findByRole('radio', { name: 'GCash' }));
+    await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
     await screen.findByText(/Could not reach the server/);
@@ -217,7 +217,7 @@ describe('guest checkout', () => {
     renderWithQuery(<CheckoutView />);
 
     await fillGuestDetails();
-    await userEvent.click(await screen.findByRole('radio', { name: 'GCash' }));
+    await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
@@ -244,7 +244,7 @@ describe('account checkout', () => {
 
     expect(await screen.findByText('shopper@example.com')).toBeInTheDocument();
     expect(await screen.findByRole('radio', { name: /Juan Dela Cruz/ })).toBeChecked();
-    await userEvent.click(screen.getByRole('radio', { name: 'Cash on delivery' }));
+    await userEvent.click(screen.getByRole('radio', { name: /^Cash on delivery/ }));
     await screen.findByText('₱1,150.00');
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
@@ -280,7 +280,7 @@ describe('account checkout', () => {
     await userEvent.type(screen.getByLabelText('City or municipality'), 'Pasig');
     await userEvent.type(screen.getByLabelText('Province'), 'Metro Manila');
     await userEvent.type(screen.getByLabelText('Postal code'), '1605');
-    await userEvent.click(screen.getByRole('radio', { name: 'Cash on delivery' }));
+    await userEvent.click(screen.getByRole('radio', { name: /^Cash on delivery/ }));
     await screen.findByText('₱1,150.00');
 
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));

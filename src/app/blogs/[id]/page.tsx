@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import { FallbackImage } from '@/components/FallbackImage';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BlogContent } from '@/features/blogs/BlogContent';
@@ -35,24 +35,26 @@ export default async function BlogPage({ params }: PageProps<'/blogs/[id]'>) {
   const blog = await loadBlog(params);
 
   return (
-    <article className="mx-auto max-w-2xl space-y-6">
+    <article className="mx-auto max-w-3xl space-y-8">
       <Link href="/blogs" className="text-sm underline">
         All posts
       </Link>
       <header className="space-y-1">
-        <h1 className="text-3xl font-semibold">{blog.title}</h1>
+        <h1 className="text-[2rem] leading-tight font-semibold tracking-tight text-balance md:text-[2.5rem]">
+          {blog.title}
+        </h1>
         <p className="text-sm text-muted-foreground">
           {blog.author} · {formatDate(blog.createdAt)}
         </p>
       </header>
       {blog.coverImageUrl && (
-        <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
-          <Image
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
+          <FallbackImage
             src={blog.coverImageUrl}
             alt=""
             fill
             preload
-            sizes="(min-width: 672px) 672px, 100vw"
+            sizes="(min-width: 768px) 768px, 100vw"
             className="object-cover"
           />
         </div>

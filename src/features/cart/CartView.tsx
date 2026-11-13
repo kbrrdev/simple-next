@@ -1,9 +1,10 @@
 'use client';
 
-import Image from 'next/image';
+import { Minus, Plus, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { FallbackImage } from '@/components/FallbackImage';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/api';
 import { formatCents } from '@/lib/money';
@@ -13,6 +14,9 @@ import { CartSkeleton } from '@/components/skeletons';
 
 // Mirrors the backend's rule as a hint. The backend refuses larger guest orders.
 const maxGuestOrderQuantity = 10;
+
+const stepperClass =
+  'flex size-8 items-center justify-center rounded-full transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30';
 
 function CartLine({ item }: { item: CartItem }) {
   const setQuantity = useSetQuantity();
@@ -29,25 +33,38 @@ function CartLine({ item }: { item: CartItem }) {
   }
 
   return (
-    <li className="flex gap-4 py-4">
+    <li className="flex gap-4 py-6 md:gap-6">
       <Link
         href={`/products/${item.productId}`}
-        className="relative size-20 shrink-0 overflow-hidden rounded-md bg-muted"
+        className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-muted md:size-28"
       >
         {item.imageUrl && (
-          <Image src={item.imageUrl} alt="" fill sizes="80px" className="object-cover" />
+          <FallbackImage
+            src={item.imageUrl}
+            alt=""
+            fill
+            sizes="112px"
+            iconClassName="size-5"
+            className="object-cover"
+          />
         )}
       </Link>
-      <div className="flex flex-1 flex-col gap-2 text-sm">
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
         <div className="flex justify-between gap-4">
-          <div>
-            <Link href={`/products/${item.productId}`} className="font-medium hover:underline">
+          <div className="min-w-0 space-y-0.5">
+            <Link href={`/products/${item.productId}`} className="font-semibold hover:underline">
               {item.productName}
             </Link>
-            {options.length > 0 && <p className="text-muted-foreground">{options.join(', ')}</p>}
-            <p>{formatCents(item.unitPriceCents)} each</p>
+            {options.length > 0 && (
+              <p className="text-sm text-muted-foreground">{options.join(' · ')}</p>
+            )}
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {formatCents(item.unitPriceCents)} each
+            </p>
           </div>
-          <p className="font-medium">{item.available && formatCents(item.lineTotalCents)}</p>
+          <p className="font-semibold tabular-nums">
+            {item.available && formatCents(item.lineTotalCents)}
+          </p>
         </div>
 
         {!item.available ? (
@@ -60,41 +77,46 @@ function CartLine({ item }: { item: CartItem }) {
           )
         )}
 
-        <div className="flex items-center gap-4">
-          {item.available && (
-            <div className="flex items-center gap-2" role="group" aria-label="Quantity">
-              <Button
-                variant="outline"
-                size="icon"
+        <div className="flex items-center justify-between gap-4">
+          {item.available ? (
+            <div
+              className="flex items-center gap-1 rounded-full border border-border p-1"
+              role="group"
+              aria-label="Quantity"
+            >
+              <button
+                type="button"
                 aria-label={`Decrease quantity of ${item.productName}`}
                 disabled={busy || item.quantity <= 1}
                 onClick={() => change(item.quantity - 1)}
+                className={stepperClass}
               >
-                −
-              </Button>
-              <span aria-live="polite" className="w-8 text-center">
+                <Minus aria-hidden className="size-4" />
+              </button>
+              <span aria-live="polite" className="w-8 text-center font-semibold tabular-nums">
                 {item.quantity}
               </span>
-              <Button
-                variant="outline"
-                size="icon"
+              <button
+                type="button"
                 aria-label={`Increase quantity of ${item.productName}`}
                 disabled={busy || item.quantity >= maxQuantity}
                 onClick={() => change(item.quantity + 1)}
+                className={stepperClass}
               >
-                +
-              </Button>
+                <Plus aria-hidden className="size-4" />
+              </button>
             </div>
+          ) : (
+            <span />
           )}
-          <Button
-            variant="link"
-            size="sm"
-            className="px-0"
+          <button
+            type="button"
             disabled={busy}
             onClick={() => remove.mutate(item.variantId)}
+            className="text-sm font-semibold underline underline-offset-4 disabled:opacity-50"
           >
             Remove
-          </Button>
+          </button>
         </div>
       </div>
     </li>
@@ -130,11 +152,15 @@ export function CartView() {
   }
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="space-y-3">
-        <p>Your cart is empty.</p>
-        <Link href="/" className="underline">
-          Continue shopping
-        </Link>
+      <div className="flex flex-col items-start gap-4 border-t border-hairline py-10">
+        <ShoppingBag aria-hidden className="size-8" strokeWidth={1.5} />
+        <div className="space-y-1">
+          <p className="text-lg font-semibold">Your cart is empty</p>
+          <p className="text-muted-foreground">Find something you like, and it will show here.</p>
+        </div>
+        <Button asChild size="lg" variant="outline" className="border-foreground">
+          <Link href="/">Start shopping</Link>
+        </Button>
       </div>
     );
   }
@@ -142,27 +168,32 @@ export function CartView() {
   const totalQuantity = cart.items.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <div className="grid gap-8 md:grid-cols-[1fr_18rem]">
-      <ul className="divide-y">
+    <div className="grid gap-10 md:grid-cols-[1fr_minmax(20rem,24rem)] md:gap-16 lg:gap-24">
+      <ul className="divide-y divide-hairline border-t border-hairline">
         {cart.items.map((item) => (
           <CartLine key={item.variantId} item={item} />
         ))}
       </ul>
-      <aside className="h-fit space-y-4 rounded-md border p-4">
-        <div className="flex justify-between font-medium">
-          <span>Subtotal</span>
-          <span>{formatCents(cart.subtotalCents)}</span>
+      <aside className="h-fit md:sticky md:top-32">
+        <div className="space-y-5 rounded-xl border border-border p-6 shadow-float">
+          <h2 className="text-lg font-semibold">Order summary</h2>
+          <div className="flex justify-between border-b border-hairline pb-5">
+            <span>
+              Subtotal · {totalQuantity} {totalQuantity === 1 ? 'item' : 'items'}
+            </span>
+            <span className="font-semibold tabular-nums">{formatCents(cart.subtotalCents)}</span>
+          </div>
+          <p className="text-sm text-muted-foreground">Shipping and tax are shown at checkout.</p>
+          {isGuest && totalQuantity > maxGuestOrderQuantity && (
+            <p className="text-sm text-destructive">
+              A guest order can have up to {maxGuestOrderQuantity} items. Log in, or remove some
+              items.
+            </p>
+          )}
+          <Button asChild size="lg" className="w-full">
+            <Link href="/checkout">Checkout</Link>
+          </Button>
         </div>
-        <p className="text-sm text-muted-foreground">Shipping and tax are shown at checkout.</p>
-        {isGuest && totalQuantity > maxGuestOrderQuantity && (
-          <p className="text-sm text-destructive">
-            A guest order can have up to {maxGuestOrderQuantity} items. Log in, or remove some
-            items.
-          </p>
-        )}
-        <Button asChild className="w-full">
-          <Link href="/checkout">Checkout</Link>
-        </Button>
       </aside>
     </div>
   );
