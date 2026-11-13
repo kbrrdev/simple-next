@@ -1,6 +1,6 @@
 'use client';
 
-import { UserRound } from 'lucide-react';
+import { CircleUserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -14,15 +14,11 @@ import {
 import { useLogout, useSession } from '@/features/auth/api';
 import { headerButtonClass } from './header-button';
 
-/**
- * The round button at the header's right: a menu of account pages, or of logging in. A
- * logged-in shopper sees their email's first letter, so the state shows at a glance.
- */
+/** The round button at the header's right: a menu of account pages, or of logging in. */
 export function AccountMenu() {
   const { data: user } = useSession();
   const logout = useLogout();
   const router = useRouter();
-  const initial = user?.email.charAt(0).toUpperCase();
 
   return (
     <DropdownMenu>
@@ -30,16 +26,7 @@ export function AccountMenu() {
         aria-label={user ? 'Account menu' : 'Log in or sign up'}
         className={headerButtonClass}
       >
-        {initial ? (
-          <span
-            aria-hidden
-            className="flex size-8 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-background"
-          >
-            {initial}
-          </span>
-        ) : (
-          <UserRound aria-hidden className="size-5" />
-        )}
+        <CircleUserRound aria-hidden className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
