@@ -92,6 +92,10 @@ This is the customer storefront for the `simple-express` backend. The admin app 
 - Disable submit buttons while saving, so that a double click cannot send twice.
 - Keep list filters and the page number in the URL, so that links and the back button work.
 
+## Design
+
+- Follow `DESIGN.md`. The overall structure follows Airbnb's site, but wherever shopping has a convention shoppers already know, such as the product gallery, the purchase panel, the cart, checkout, and search, use the e-commerce convention.
+
 ## API and Data
 
 - Talk to the backend through one browser API client and one set of server API helpers, sharing the generated types.

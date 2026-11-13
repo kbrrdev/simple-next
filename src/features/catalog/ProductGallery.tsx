@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ImageOff, LayoutGrid, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ImageOff, X } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 import { useEffect, useRef, useState } from 'react';
 import { FallbackImage } from '@/components/FallbackImage';
@@ -13,7 +13,7 @@ interface ProductGalleryProps {
   name: string;
   /** In display order. */
   images: ProductImage[];
-  /** The chosen variant's own photo, shown first when it has one. */
+  /** The chosen variant's own photo, shown large when it has one. */
   featuredId: string | null;
 }
 
@@ -38,10 +38,7 @@ function Photo({
   );
 }
 
-/**
- * Every photo in one scrolling column, opened from "Show all photos" or a photo. It starts at
- * the photo the shopper chose.
- */
+/** Every photo in one scrolling column, starting at the photo the shopper opened. */
 function AllPhotos({
   name,
   images,
@@ -71,8 +68,7 @@ function AllPhotos({
               aria-label="Close photos"
               className="flex size-10 items-center justify-center rounded-full hover:bg-muted"
             >
-              <ChevronLeft aria-hidden className="size-5 md:hidden" />
-              <X aria-hidden className="hidden size-5 md:block" />
+              <X aria-hidden className="size-5" />
             </DialogPrimitive.Close>
             <DialogPrimitive.Title className="ml-2 truncate font-semibold">
               {name}
@@ -96,18 +92,25 @@ function AllPhotos({
 }
 
 /**
- * A product's photos. Wide screens show a mosaic of up to five, with the main photo large. Phones
- * swipe through them, with a counter. Either opens every photo in a full-screen view.
+ * A product's photos, the way shops show them. Wide screens show one large photo, with arrows,
+ * above a row of thumbnails. Phones swipe through the photos, with dots. Opening a photo shows
+ * every photo full screen.
  */
 export function ProductGallery({ name, images, featuredId }: ProductGalleryProps) {
   const [open, setOpen] = useState(false);
   const [startId, setStartId] = useState<string | null>(null);
-  const [index, setIndex] = useState(0);
+  // A thumbnail the shopper picks wins, until they choose another variant.
+  const [picked, setPicked] = useState<{ id: string; featuredId: string | null } | null>(null);
+  const [swipeIndex, setSwipeIndex] = useState(0);
   const track = useRef<HTMLDivElement>(null);
 
-  // The chosen variant's photo leads the mosaic.
-  const lead = images.find((image) => image.id === featuredId) ?? images[0];
-  const ordered = lead ? [lead, ...images.filter((image) => image.id !== lead.id)] : [];
+  const activeId =
+    picked && picked.featuredId === featuredId ? picked.id : (featuredId ?? images[0]?.id);
+  const activeIndex = Math.max(
+    images.findIndex((image) => image.id === activeId),
+    0,
+  );
+  const active = images[activeIndex];
 
   // On phones, choosing a variant with its own photo swipes to it.
   useEffect(() => {
@@ -118,74 +121,92 @@ export function ProductGallery({ name, images, featuredId }: ProductGalleryProps
     }
   }, [featuredId, images]);
 
-  function show(imageId: string | null) {
+  function pick(index: number) {
+    const image = images[(index + images.length) % images.length];
+    setPicked({ id: image.id, featuredId });
+  }
+
+  function enlarge(imageId: string) {
     setStartId(imageId);
     setOpen(true);
   }
 
-  if (images.length === 0) {
+  if (!active) {
     return (
-      <div className="-mx-6 flex aspect-square items-center justify-center bg-muted text-muted-foreground md:mx-0 md:aspect-auto md:h-[min(28rem,50vh)] md:rounded-xl">
+      <div className="-mx-6 flex aspect-square items-center justify-center bg-muted text-muted-foreground md:mx-0 md:rounded-xl">
         <ImageOff aria-hidden className="size-10" strokeWidth={1.25} />
       </div>
     );
   }
 
-  const tiles = ordered.slice(0, 5);
-  const mosaic = cn(
-    // Capped in height, so that the price and Add to cart show early on a laptop.
-    'hidden h-[min(28rem,50vh)] gap-2 overflow-hidden rounded-xl md:grid',
-    tiles.length === 1 && 'grid-cols-1',
-    tiles.length === 2 && 'grid-cols-2',
-    tiles.length >= 3 && 'grid-cols-4 grid-rows-2',
-  );
+  const arrow =
+    'absolute top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/90 opacity-0 shadow-raise transition-opacity group-hover:opacity-100 focus-visible:opacity-100 hover:bg-background';
 
   return (
     <>
-      {/* Wide screens: the mosaic. */}
-      <div className="relative">
-        <div className={mosaic}>
-          {tiles.map((image, position) => (
-            <button
-              key={image.id}
-              type="button"
-              aria-label={`Show photo ${position + 1} of ${images.length}`}
-              onClick={() => show(image.id)}
-              className={cn(
-                'group relative overflow-hidden bg-muted',
-                tiles.length >= 3 && position === 0 && 'col-span-2 row-span-2',
-                tiles.length === 3 && position > 0 && 'col-span-2',
-                tiles.length === 4 && position === 3 && 'col-span-2',
-              )}
-            >
-              <Photo
-                image={image}
-                priority={position === 0}
-                sizes={position === 0 && tiles.length > 1 ? '50vw' : '25vw'}
-              />
-              <span className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10" />
-            </button>
-          ))}
-        </div>
-        {images.length > 1 && (
+      {/* Wide screens: the large photo, then the thumbnails. */}
+      <div className="hidden space-y-3 md:block">
+        <div className="group relative">
           <button
             type="button"
-            onClick={() => show(null)}
-            className="absolute right-6 bottom-6 hidden items-center gap-2 rounded-lg border border-foreground bg-background px-4 py-2 text-sm font-semibold shadow-raise transition-colors hover:bg-muted md:flex"
+            aria-label={`Enlarge photo ${activeIndex + 1} of ${images.length}`}
+            onClick={() => enlarge(active.id)}
+            className="relative block aspect-square w-full cursor-zoom-in overflow-hidden rounded-xl bg-muted"
           >
-            <LayoutGrid aria-hidden className="size-4" />
-            Show all photos
+            <Photo key={active.id} image={active} priority sizes="(min-width: 1280px) 40vw, 55vw" />
           </button>
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                aria-label="Previous photo"
+                onClick={() => pick(activeIndex - 1)}
+                className={cn(arrow, 'left-4')}
+              >
+                <ChevronLeft aria-hidden className="size-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next photo"
+                onClick={() => pick(activeIndex + 1)}
+                className={cn(arrow, 'right-4')}
+              >
+                <ChevronRight aria-hidden className="size-5" />
+              </button>
+            </>
+          )}
+        </div>
+        {images.length > 1 && (
+          <ul className="grid grid-cols-5 gap-3">
+            {images.map((image, position) => (
+              <li key={image.id}>
+                <button
+                  type="button"
+                  aria-label={`Show photo ${position + 1} of ${images.length}`}
+                  aria-pressed={image.id === active.id}
+                  onClick={() => pick(position)}
+                  className={cn(
+                    'relative block aspect-square w-full overflow-hidden rounded-lg bg-muted ring-offset-2 transition',
+                    image.id === active.id
+                      ? 'ring-2 ring-foreground'
+                      : 'opacity-70 hover:opacity-100',
+                  )}
+                >
+                  <Photo image={image} sizes="96px" />
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
-      {/* Phones: a full-width swipe, with a counter. */}
+      {/* Phones: a full-width swipe, with dots. */}
       <div className="relative -mx-6 md:hidden">
         <div
           ref={track}
           onScroll={() => {
             const element = track.current;
-            if (element) setIndex(Math.round(element.scrollLeft / element.clientWidth));
+            if (element) setSwipeIndex(Math.round(element.scrollLeft / element.clientWidth));
           }}
           className="scrollbar-none flex aspect-square snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
         >
@@ -193,8 +214,8 @@ export function ProductGallery({ name, images, featuredId }: ProductGalleryProps
             <button
               key={image.id}
               type="button"
-              aria-label={`Show photo ${position + 1} of ${images.length}`}
-              onClick={() => show(image.id)}
+              aria-label={`Enlarge photo ${position + 1} of ${images.length}`}
+              onClick={() => enlarge(image.id)}
               className="relative size-full shrink-0 snap-center bg-muted"
             >
               <Photo image={image} priority={position === 0} sizes="100vw" />
@@ -202,12 +223,17 @@ export function ProductGallery({ name, images, featuredId }: ProductGalleryProps
           ))}
         </div>
         {images.length > 1 && (
-          <span
-            aria-hidden
-            className="absolute right-4 bottom-4 rounded-md bg-black/60 px-2.5 py-1 text-xs font-semibold text-white tabular-nums"
-          >
-            {Math.min(index + 1, images.length)} / {images.length}
-          </span>
+          <div aria-hidden className="absolute inset-x-0 bottom-4 flex justify-center gap-1.5">
+            {images.map((image, position) => (
+              <span
+                key={image.id}
+                className={cn(
+                  'size-2 rounded-full bg-white shadow-[0_0_2px_rgb(0_0_0/0.4)] transition-opacity',
+                  position === swipeIndex ? 'opacity-100' : 'opacity-50',
+                )}
+              />
+            ))}
+          </div>
         )}
       </div>
 
