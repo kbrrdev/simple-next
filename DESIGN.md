@@ -1,6 +1,12 @@
 # Design
 
-The storefront's visual system, as built. It follows a listings site's **structure**: a sticky header with the search in the middle, a scrolling row of category tabs, a wide grid of large photo cards, listing-style product pages, and a footer band. It borrows the structure only, never another brand's colour, font, logo, or icons. The colour and type stay quiet, so that the products' photos lead.
+The storefront's visual system, as built. The colour and type stay quiet, so that the products' photos lead.
+
+## Principle: Airbnb's structure, e-commerce conventions
+
+The overall structure follows Airbnb's site: the sticky header with the search in the middle, the category tabs, the wide grid of photo cards, the account pages, the footer band, and the tab bar along the bottom on phones. It borrows the structure only, never Airbnb's colour, font, logo, or icons.
+
+Wherever shopping has a convention that shoppers already know, that convention wins: the product gallery, the purchase panel with the price, options, and Add to cart, the cart, checkout, and the product search. When the two disagree, choose what a shopper expects from an online shop.
 
 The storefront is white-label. A store changes its look in two places only: the brand colour in `src/styles/globals.css`, and the logo in `src/config/brand.ts`. Everything below stays the same for every store.
 
@@ -53,22 +59,22 @@ Rules:
 
 ## Page patterns
 
-| Area          | Pattern                                                                                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Header        | Logo, product search in the middle, Blog, and the round cart and account buttons. On phones, only the logo.                                                       |
-| Phones        | A tab bar along the bottom: Shop, Search (opens the full-screen search), Cart, and Account. Hidden on checkout.                                                   |
-| Category tabs | On the product lists, not the home page: a sticky, sideways-scrolling row of round category images with names; the selected one is underlined.                    |
-| Home          | Banners, then "Shop by category" as large round images, then sideways rows of product cards: new arrivals, then one per top-level category, each with "Show all". |
-| Banner        | Full width on phones (4:5 with a phone image, else 2:1), a rounded 3:1 band on wider screens; title over a dark fade; dots; no autoplay.                          |
-| Product card  | A photo carousel that swipes on touch and steps with arrows on hover, the name, a line such as "2 sizes · 2 colors", and the price.                               |
-| Product page  | Title above a photo mosaic of up to five photos; details beside a purchase card; a bar with Add to cart above the tab bar on phones.                              |
-| Cart          | Lines with a round quantity stepper, beside an order summary card.                                                                                                |
-| Checkout      | "Confirm and pay": sections separated by hairlines, addresses and payment methods as large selectable cards, and a summary card.                                  |
-| Order         | The status with a coloured dot, a payment card outlined in near-black while payment is due, the items, and a grey totals panel.                                   |
-| Login         | A centred card with a title bar and a welcome line. Phones show it without the frame.                                                                             |
-| Account       | Cards with an icon, a title, and a line of text. Sub-pages show a breadcrumb back to the account.                                                                 |
-| Blog          | Cards with a 3:2 cover photo; posts in a readable column with a large cover.                                                                                      |
-| Footer        | A grey band with Shop, Help, and the store's links, then © and "Prices in PHP · Ships within the Philippines".                                                    |
+| Area          | Pattern                                                                                                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header        | Logo, product search in the middle, Blog, and the round cart and account buttons. On phones, only the logo.                                                                       |
+| Phones        | A tab bar along the bottom: Shop, Search (opens the full-screen search), Cart, and Account. Hidden on checkout.                                                                   |
+| Category tabs | On the product lists, not the home page: a sticky, sideways-scrolling row of round category images with names; the selected one is underlined.                                    |
+| Home          | Banners, then "Shop by category" as large round images, then sideways rows of product cards: new arrivals, then one per top-level category, each with "Show all".                 |
+| Banner        | Full width on phones (4:5 with a phone image, else 2:1), a rounded 3:1 band on wider screens; title over a dark fade; dots; no autoplay.                                          |
+| Product card  | A photo carousel that swipes on touch and steps with arrows on hover, the name, a line such as "2 sizes · 2 colors", and the price.                                               |
+| Product page  | A large photo with a row of thumbnails on the left; the title, price, options, and Add to cart on the right, staying in view; a bar with Add to cart above the tab bar on phones. |
+| Cart          | Lines with a round quantity stepper, beside an order summary card.                                                                                                                |
+| Checkout      | "Confirm and pay": sections separated by hairlines, addresses and payment methods as large selectable cards, and a summary card.                                                  |
+| Order         | The status with a coloured dot, a payment card outlined in near-black while payment is due, the items, and a grey totals panel.                                                   |
+| Login         | A centred card with a title bar and a welcome line. Phones show it without the frame.                                                                                             |
+| Account       | Cards with an icon, a title, and a line of text. Sub-pages show a breadcrumb back to the account.                                                                                 |
+| Blog          | Cards with a 3:2 cover photo; posts in a readable column with a large cover.                                                                                                      |
+| Footer        | A grey band with Shop, Help, and the store's links, then © and "Prices in PHP · Ships within the Philippines".                                                                    |
 
 ## Components
 

@@ -91,9 +91,9 @@ function highlighted(container: HTMLElement) {
   return [...container.querySelectorAll('label[data-selected]')].map((label) => label.textContent);
 }
 
-/** The photo the mosaic shows large, from its first tile. */
-function leadPhoto() {
-  return within(screen.getAllByRole('button', { name: /Show photo 1 of/ })[0]).getByRole('img');
+/** The large photo. Wide screens show it; phones swipe instead, later in the page. */
+function largePhoto() {
+  return within(screen.getAllByRole('button', { name: /^Enlarge photo/ })[0]).getByRole('img');
 }
 
 beforeEach(() => {
@@ -143,23 +143,51 @@ describe('ProductListing', () => {
     expect(screen.getByRole('radio', { name: 'Red' })).toBeChecked();
   });
 
-  it("leads the photos with the chosen variant's own photo", async () => {
+  it("shows the chosen variant's own photo large, and marks its thumbnail", async () => {
     const user = userEvent.setup();
     render();
 
-    expect(leadPhoto()).toHaveAttribute('alt', 'Shirt photo front');
+    expect(largePhoto()).toHaveAttribute('alt', 'Shirt photo front');
 
     await user.click(screen.getByRole('radio', { name: 'M' }));
     await user.click(screen.getByRole('radio', { name: 'Blue' }));
 
-    expect(leadPhoto()).toHaveAttribute('alt', 'Shirt photo blue');
+    expect(largePhoto()).toHaveAttribute('alt', 'Shirt photo blue');
+    expect(screen.getByRole('button', { name: 'Show photo 3 of 3' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  it('switches the large photo from the thumbnails and the arrows', async () => {
+    const user = userEvent.setup();
+    render();
+
+    await user.click(screen.getByRole('button', { name: 'Show photo 2 of 3' }));
+    expect(largePhoto()).toHaveAttribute('alt', 'Shirt photo back');
+    expect(screen.getByRole('button', { name: 'Show photo 2 of 3' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Next photo' }));
+    expect(largePhoto()).toHaveAttribute('alt', 'Shirt photo blue');
+
+    // Past the last photo, the arrows wrap around.
+    await user.click(screen.getByRole('button', { name: 'Next photo' }));
+    expect(largePhoto()).toHaveAttribute('alt', 'Shirt photo front');
+
+    // Choosing a variant with its own photo takes over the large photo.
+    await user.click(screen.getByRole('radio', { name: 'M' }));
+    await user.click(screen.getByRole('radio', { name: 'Blue' }));
+    expect(largePhoto()).toHaveAttribute('alt', 'Shirt photo blue');
   });
 
   it('shows every photo in a full-screen view', async () => {
     const user = userEvent.setup();
     render();
 
-    await user.click(screen.getByRole('button', { name: 'Show all photos' }));
+    await user.click(screen.getAllByRole('button', { name: /^Enlarge photo/ })[0]);
 
     const dialog = await screen.findByRole('dialog', { name: 'Linen Shirt' });
     expect(within(dialog).getAllByRole('img')).toHaveLength(3);

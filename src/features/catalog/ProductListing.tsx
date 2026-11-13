@@ -31,7 +31,7 @@ function Heading({ product, category, className }: ProductListingProps & { class
           {category.name}
         </Link>
       )}
-      <h1 className="text-2xl font-semibold tracking-tight text-balance md:text-[1.75rem]">
+      <h1 className="text-2xl font-semibold tracking-tight text-balance md:text-[1.875rem]">
         {product.name}
       </h1>
     </div>
@@ -47,10 +47,10 @@ function StockLine({ stock }: { stock: number }) {
 }
 
 /**
- * A product laid out like a listing: the photos across the top, the details on the left, and a
- * purchase card that stays in view on the right. On phones a bar along the bottom keeps the price
- * and Add to cart in reach. The chosen variant drives all three, and leads the photos when it
- * has its own.
+ * A product the way shops show it: the photos on the left, and on the right a purchase panel with
+ * the title, price, options, and Add to cart, which stays in view. On phones a bar along the
+ * bottom keeps the price and Add to cart in reach. The chosen variant drives the photos, price,
+ * and stock, and its own photo shows large when it has one.
  */
 export function ProductListing({ product, category }: ProductListingProps) {
   const variants: VariantChoice[] = product.variants;
@@ -85,30 +85,23 @@ export function ProductListing({ product, category }: ProductListingProps) {
 
   return (
     <>
-      {/* One heading: below the photos on phones, above them from tablets up. */}
-      <div className="flex flex-col">
-        <Heading
-          product={product}
-          category={category}
-          className="order-2 pt-6 md:order-1 md:pt-0 md:pb-6"
-        />
-        <div className="order-1 md:order-2">
+      {/*
+        Two columns from tablets up: the photos and description on the left, and the purchase
+        panel on the right, staying in view. Phones stack the photos, the panel, then the details.
+      */}
+      <div className="grid gap-x-12 md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)] lg:gap-x-16">
+        <div className="md:col-start-1 md:row-start-1">
           <ProductGallery name={product.name} images={images} featuredId={featuredId ?? null} />
         </div>
-      </div>
 
-      {/*
-        One column on phones: the purchase options, then the details. From tablets
-        up, the details sit on the left and the purchase card stays in view on the right.
-      */}
-      <div className="grid gap-x-16 pt-6 md:grid-cols-[1fr_minmax(20rem,24rem)] md:pt-12 lg:gap-x-24">
         <aside className="md:col-start-2 md:row-span-3 md:row-start-1">
           <section
             aria-label="Buy"
-            className="space-y-6 border-b border-hairline pb-8 md:sticky md:top-32 md:rounded-xl md:border md:border-border md:p-6 md:shadow-float"
+            className="space-y-6 border-b border-hairline pt-6 pb-8 md:sticky md:top-32 md:border-b-0 md:pt-0"
           >
+            <Heading product={product} category={category} />
             <div>
-              <p className="text-2xl font-semibold tabular-nums md:text-[1.375rem]">{price}</p>
+              <p className="text-2xl font-semibold tabular-nums">{price}</p>
               <StockLine stock={stock} />
             </div>
             <OptionPicker
@@ -123,8 +116,9 @@ export function ProductListing({ product, category }: ProductListingProps) {
               <Button size="lg" className="h-12 w-full text-base" disabled={!canAdd} onClick={add}>
                 {addLabel}
               </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                Shipping and tax are shown at checkout.
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Truck aria-hidden className="size-4 shrink-0" strokeWidth={1.75} />
+                Ships within the Philippines. Shipping and tax are shown at checkout.
               </p>
             </div>
           </section>
@@ -133,7 +127,7 @@ export function ProductListing({ product, category }: ProductListingProps) {
         {product.description && (
           <section
             aria-labelledby="about-heading"
-            className="min-w-0 space-y-4 border-b border-hairline py-8 md:col-start-1 md:pt-0"
+            className="min-w-0 space-y-4 border-b border-hairline py-8 md:col-start-1 md:border-t md:border-b-0 md:pt-10"
           >
             <h2 id="about-heading" className="text-xl font-semibold">
               About this item
@@ -142,10 +136,7 @@ export function ProductListing({ product, category }: ProductListingProps) {
           </section>
         )}
 
-        <section
-          aria-labelledby="delivery-heading"
-          className="flex min-w-0 gap-4 py-8 md:col-start-1"
-        >
+        <section aria-labelledby="delivery-heading" className="flex min-w-0 gap-4 py-8 md:hidden">
           <Truck aria-hidden className="mt-0.5 size-6 shrink-0" strokeWidth={1.5} />
           <div className="space-y-1">
             <h2 id="delivery-heading" className="font-semibold">
