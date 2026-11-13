@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, categories, search, products, and blogs. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built. Security headers are not set yet.
+Status: the public catalog is built: home, all products, categories, search, products, and blogs. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built. Security headers are not set yet.
 
 ## Request Lifecycle
 
@@ -70,7 +70,8 @@ src/
 
 | Page                              | Rendered | Backend routes                                                                                         |
 | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| Home `/`                          | Server   | `GET /api/products`, `GET /api/categories/tree`                                                        |
+| Home `/`                          | Server   | `GET /api/banners`, `GET /api/products`, `GET /api/categories/tree`                                    |
+| All products `/products`          | Server   | `GET /api/products`                                                                                    |
 | Category `/categories/<id>`       | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
 | Search `/search?q=`               | Server   | `GET /api/products?search=`                                                                            |
 | Product `/products/<id>`          | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
@@ -199,7 +200,7 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 
 - Every public page sets its title and description with the Metadata API, and product and blog pages add their image.
 - Search results are `noindex`, as they repeat the product and category pages.
-- `sitemap.xml` lists the home page, categories, products, and blogs, and `robots.txt` points to it.
+- `sitemap.xml` lists the home page, all products, categories, products, and blogs, and `robots.txt` points to it.
 - Personal pages, guest order links, and password reset pages are marked `noindex`.
 - Images use `next/image`, and `next.config.ts` allows only the API's `/uploads` path and `NEXT_PUBLIC_IMAGE_URL`. Next.js refuses images from private addresses, so it allows them only when the API runs on `localhost`, as when developing.
 
@@ -211,6 +212,9 @@ The layout follows Airbnb's site structure, and shopping conventions where shopp
 - The logo is a file under `public/`, set in `src/config/brand.ts`. Without one, the store name shows as a wordmark.
 - `page-x` sets the page's side margins, and `productGridClass` in `src/features/catalog/grid.ts` the product grid: two columns on phones, three on tablets, and four from laptops up.
 - The header (`src/components/layout`) holds the logo, the product search, the cart, and the account menu. The cart and the account menu are round, light grey buttons, in `--control`, with the bag and profile icons. On phones it holds only the logo: search, the cart, and the account live in a tab bar along the bottom, which checkout hides.
+- The home page shows the banners, then "Shop by category" with the top-level categories as large round images, then a row of new arrivals, then a row for each top-level category, which includes its subcategories' products. Each row links to its full list, and the page ends with a link to `/products`. The sticky category tabs are left out of the home page, and show on the product lists, where their "All" tab is `/products`.
+- `/products` is the list of every product. `/search` without search text or a category redirects there, keeping the sort and page, and an empty search goes there too.
+- Banners (`src/features/banners`) come from `GET /api/banners`, which returns only the active ones within their dates, in order. They swipe on touch screens and step with arrows on hover, and never play by themselves. Phones get the banner's phone image when it has one, through `<picture>`, so only one image loads. A banner with a `linkUrl` is a link, and its title and subtitle show over the image as text. Without banners, the carousel is left out.
 - The product search (`src/features/search`) suggests as the shopper types: up to five products from `GET /api/products?search=`, after a 250 ms pause and from two characters, plus matching categories from the cached category tree, and a link to all results. Before typing, it offers the top-level categories. It follows the combobox pattern, so the arrow keys, Enter, and Escape work, and screen readers hear the suggestions. Nothing is kept between visits, as `localStorage` holds only the guest cart.
 - On phones, the tab bar's Search tab opens the search as a full screen, with the tab bar still above it. Tapping Search again, another tab, or any page change closes it.
 - The product page (`ProductListing`) shows the photos the way shops do: one large photo with arrows, above a row of thumbnails, and opening a photo shows every photo full screen. Beside it, the title, price, options, and Add to cart stay in view. On phones the photos swipe with dots, and a bar above the tab bar keeps the price and Add to cart in reach. The chosen variant drives the price, stock, and photos: when it has its own photo (`assetId`), that photo shows large.

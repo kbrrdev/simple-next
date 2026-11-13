@@ -43,7 +43,7 @@ interface Section {
 
 function searchHref(query: string) {
   const term = query.trim();
-  return term ? `/search?q=${encodeURIComponent(term)}` : '/search';
+  return term ? `/search?q=${encodeURIComponent(term)}` : '/products';
 }
 
 function Highlighted({ text, query }: { text: string; query: string }) {

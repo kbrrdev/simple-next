@@ -63,7 +63,9 @@ Rules:
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Header        | Logo, product search in the middle, Blog, and the round cart and account buttons. On phones, only the logo.                                                                       |
 | Phones        | A tab bar along the bottom: Shop, Search (opens the full-screen search), Cart, and Account. Hidden on checkout.                                                                   |
-| Category tabs | A sticky, sideways-scrolling row of round category images with names; the selected one is underlined.                                                                             |
+| Category tabs | On the product lists, not the home page: a sticky, sideways-scrolling row of round category images with names; the selected one is underlined.                                    |
+| Home          | Banners, then "Shop by category" as large round images, then sideways rows of product cards: new arrivals, then one per top-level category, each with "Show all".                 |
+| Banner        | Full width on phones (4:5 with a phone image, else 2:1), a rounded 3:1 band on wider screens; title over a dark fade; dots; no autoplay.                                          |
 | Product card  | A photo carousel that swipes on touch and steps with arrows on hover, the name, a line such as "2 sizes · 2 colors", and the price.                                               |
 | Product page  | A large photo with a row of thumbnails on the left; the title, price, options, and Add to cart on the right, staying in view; a bar with Add to cart above the tab bar on phones. |
 | Cart          | Lines with a round quantity stepper, beside an order summary card.                                                                                                                |
