@@ -168,7 +168,10 @@ describe('AccountMenu', () => {
     renderWithQuery(<AccountMenu />);
 
     await waitFor(() => expect(request).toHaveBeenCalledWith('/api/auth/me'));
-    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+    const button = await screen.findByRole('button', { name: 'Account menu' });
+    // The email's first letter, so the logged-in state shows at a glance.
+    expect(button).toHaveTextContent('S');
+    await userEvent.click(button);
 
     expect(await screen.findByText('shopper@example.com')).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Orders' })).toHaveAttribute(
