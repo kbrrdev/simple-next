@@ -9,8 +9,7 @@ import type { Product } from './api';
 import { productImageClass } from './grid';
 import { isInStock, optionSummary, priceRange, sortedImages } from './product';
 
-const imageSizes =
-  '(min-width: 1536px) 20vw, (min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
+const imageSizes = '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw';
 
 /**
  * A product's photos, swiped on touch screens and stepped with arrows on hover. The dots show
@@ -125,12 +124,12 @@ export function ProductCard({ product }: { product: Product }) {
       <div className={`relative overflow-hidden bg-muted ${productImageClass}`}>
         <PhotoCarousel product={product} href={href} />
         {soldOut && (
-          <span className="absolute top-3 left-3 rounded-full bg-background px-3 py-1 text-xs font-semibold shadow-raise">
+          <span className="absolute top-2 left-2 rounded-full bg-background px-2.5 py-1 text-[0.6875rem] font-semibold shadow-raise md:top-3 md:left-3 md:px-3 md:text-xs">
             Sold out
           </span>
         )}
       </div>
-      <div className="mt-3 space-y-0.5 text-[0.9375rem] leading-snug">
+      <div className="mt-2 space-y-0.5 text-sm leading-snug md:mt-3 md:text-[0.9375rem]">
         <h3>
           <Link href={href} className="font-semibold hover:underline">
             {product.name}

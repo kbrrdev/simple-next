@@ -44,7 +44,7 @@ export async function CategoryTabs({ activeId }: { activeId: string | null }) {
   if (categories.length === 0) return null;
 
   return (
-    <div className="sticky top-[4.5rem] z-30 -mx-6 -mt-6 bg-background px-6 pt-4 shadow-[0_1px_0_var(--hairline)] md:top-24 md:-mx-10 md:-mt-8 md:px-10 xl:-mx-20 xl:px-20">
+    <div className="sticky top-14 z-30 -mx-6 -mt-6 bg-background px-6 pt-4 shadow-[0_1px_0_var(--hairline)] md:top-24 md:-mx-10 md:-mt-8 md:px-10 xl:-mx-20 xl:px-20">
       <ScrollRow label="Categories">
         <nav aria-label="Categories" className="flex gap-8">
           <Tab href="/" label="All" active={activeId === null}>
