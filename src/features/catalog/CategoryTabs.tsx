@@ -47,7 +47,7 @@ export async function CategoryTabs({ activeId }: { activeId: string | null }) {
     <div className="sticky top-14 z-30 -mx-6 -mt-6 bg-background px-6 pt-4 shadow-[0_1px_0_var(--hairline)] md:top-24 md:-mx-10 md:-mt-8 md:px-10 xl:-mx-20 xl:px-20">
       <ScrollRow label="Categories">
         <nav aria-label="Categories" className="flex gap-8">
-          <Tab href="/" label="All" active={activeId === null}>
+          <Tab href="/products" label="All" active={activeId === null}>
             <LayoutGrid aria-hidden className="size-6" strokeWidth={1.75} />
           </Tab>
           {categories.map((category) => (
@@ -74,6 +74,47 @@ export async function CategoryTabs({ activeId }: { activeId: string | null }) {
         </nav>
       </ScrollRow>
     </div>
+  );
+}
+
+/**
+ * The home page's top-level categories, as large round images under the banners. Unlike the tabs,
+ * it scrolls away with the page, as the home page has nothing to filter.
+ */
+export async function ShopByCategory() {
+  const categories = await getCategoryTree();
+  if (categories.length === 0) return null;
+
+  return (
+    <section className="space-y-4">
+      <h2 className="text-xl font-bold tracking-tight md:text-2xl">Shop by category</h2>
+      <ScrollRow label="Shop by category">
+        <ul className="flex gap-4 md:gap-8">
+          {categories.map((category) => (
+            <li key={category.id}>
+              <Link
+                href={`/categories/${category.id}`}
+                className="group flex w-20 flex-col items-center gap-2 text-center text-sm font-medium md:w-24"
+              >
+                <span className="relative size-16 overflow-hidden rounded-full bg-muted transition-transform group-hover:scale-105 md:size-20">
+                  {category.imageUrl && (
+                    <FallbackImage
+                      src={category.imageUrl}
+                      iconClassName="size-5"
+                      alt=""
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                  )}
+                </span>
+                <span className="line-clamp-2">{category.name}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </ScrollRow>
+    </section>
   );
 }
 

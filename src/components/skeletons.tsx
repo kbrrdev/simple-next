@@ -65,6 +65,23 @@ export function ProductRowSkeleton() {
   );
 }
 
+/** The home page's Shop by category row. */
+export function ShopByCategorySkeleton() {
+  return (
+    <Loading label="Loading categories" className="space-y-4 overflow-hidden">
+      <Skeleton className="h-7 w-48" />
+      <div className="flex gap-4 md:gap-8">
+        {repeat(8).map((index) => (
+          <div key={index} className="flex w-20 shrink-0 flex-col items-center gap-2 md:w-24">
+            <Skeleton className="size-16 rounded-full md:size-20" />
+            <Skeleton className="h-4 w-14" />
+          </div>
+        ))}
+      </div>
+    </Loading>
+  );
+}
+
 /** The banner carousel on the home page. */
 export function BannerSkeleton() {
   return (

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Pagination } from '@/components/Pagination';
 import { findCategory, getCategoryTree, getProducts } from '@/features/catalog/api';
 import { CategoryTabs, rootCategoryId } from '@/features/catalog/CategoryTabs';
@@ -37,6 +38,9 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
     return id ? findCategory(tree, id) : undefined;
   })();
   const categoryId = category?.id;
+  // Without search text or a category, this is the all products page.
+  if (!search && !categoryId) redirect(productListHref('/products', { sort, page }));
+
   const { data: products, meta } = await getProducts({
     search,
     categoryId,
@@ -60,7 +64,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/search'>)
       </ProductListHeader>
       <ProductGrid
         products={products}
-        empty={search ? `No products match "${search}".` : 'No products yet. Check back soon.'}
+        empty={search ? `No products match "${search}".` : 'No products in this category yet.'}
       />
       <Pagination
         {...meta}

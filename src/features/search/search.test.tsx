@@ -126,6 +126,14 @@ describe('SearchBox', () => {
     expect(navigation.push).toHaveBeenCalledWith('/search?q=red%20shirt');
   });
 
+  it('shows every product when searching for nothing', async () => {
+    renderWithQuery(<SearchBox categories={categories} />);
+
+    await userEvent.type(field(), '   {Enter}');
+
+    expect(navigation.push).toHaveBeenCalledWith('/products');
+  });
+
   it('says when no products match, and still offers the full search', async () => {
     vi.mocked(request).mockResolvedValue({ data: [] });
     renderWithQuery(<SearchBox categories={categories} />);

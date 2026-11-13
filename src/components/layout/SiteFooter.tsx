@@ -44,7 +44,7 @@ export function SiteFooter() {
       <div className="page-x grid gap-10 py-12 sm:grid-cols-3">
         <Column title="Shop">
           <li>
-            <Link href="/search" className={linkClass}>
+            <Link href="/products" className={linkClass}>
               All products
             </Link>
           </li>

@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { BannerSkeleton, CategoryTabsSkeleton, ProductRowSkeleton } from '@/components/skeletons';
+import { BannerSkeleton, ProductRowSkeleton, ShopByCategorySkeleton } from '@/components/skeletons';
 import { env } from '@/config/env';
 import { getBanners } from '@/features/banners/api';
 import { BannerCarousel } from '@/features/banners/BannerCarousel';
 import { getCategoryTree, getProducts } from '@/features/catalog/api';
-import { CategoryTabs } from '@/features/catalog/CategoryTabs';
+import { ShopByCategory } from '@/features/catalog/CategoryTabs';
 import { ProductGrid } from '@/features/catalog/ProductGrid';
 import { ProductRow } from '@/features/catalog/ProductRow';
 
@@ -71,12 +71,12 @@ export default function HomePage() {
   return (
     <>
       <h1 className="sr-only">{env.storeName}</h1>
-      <Suspense fallback={<CategoryTabsSkeleton />}>
-        <CategoryTabs activeId={null} />
-      </Suspense>
-      <div className="space-y-12 pt-6 md:pt-8">
+      <div className="space-y-12">
         <Suspense fallback={<BannerSkeleton />}>
           <Banners />
+        </Suspense>
+        <Suspense fallback={<ShopByCategorySkeleton />}>
+          <ShopByCategory />
         </Suspense>
         <Suspense fallback={<ProductRowSkeleton />}>
           <NewArrivals />
