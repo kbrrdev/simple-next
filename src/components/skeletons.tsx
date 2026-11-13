@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { productGridClass, productImageClass } from '@/features/catalog/grid';
+import { productGridClass, productImageClass, productRowClass } from '@/features/catalog/grid';
 import { cn } from '@/lib/utils';
 
 /**
@@ -29,18 +29,47 @@ function repeat(count: number) {
   return Array.from({ length: count }, (_, index) => index);
 }
 
+function ProductCardSkeleton() {
+  return (
+    <div className="space-y-2">
+      <Skeleton className={productImageClass} />
+      <Skeleton className="mt-3 h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+      <Skeleton className="h-4 w-1/4" />
+    </div>
+  );
+}
+
 /** The same grid as ProductGrid. */
 export function ProductGridSkeleton({ count = 10 }: { count?: number }) {
   return (
     <Loading label="Loading products" className={productGridClass}>
       {repeat(count).map((index) => (
-        <div key={index} className="space-y-2">
-          <Skeleton className={productImageClass} />
-          <Skeleton className="mt-3 h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-4 w-1/4" />
-        </div>
+        <ProductCardSkeleton key={index} />
       ))}
+    </Loading>
+  );
+}
+
+/** The same row as ProductRow, with its title. */
+export function ProductRowSkeleton() {
+  return (
+    <Loading label="Loading products" className="space-y-4 overflow-hidden">
+      <Skeleton className="h-7 w-48" />
+      <div className={productRowClass}>
+        {repeat(4).map((index) => (
+          <ProductCardSkeleton key={index} />
+        ))}
+      </div>
+    </Loading>
+  );
+}
+
+/** The banner carousel on the home page. */
+export function BannerSkeleton() {
+  return (
+    <Loading label="Loading banners">
+      <Skeleton className="-mx-6 aspect-2/1 rounded-none md:mx-0 md:aspect-3/1 md:rounded-xl" />
     </Loading>
   );
 }

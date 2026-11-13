@@ -53,20 +53,22 @@ Rules:
 
 ## Page patterns
 
-| Area          | Pattern                                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Header        | Logo, product search in the middle, Blog, and the round cart and account buttons. On phones, only the logo.                          |
-| Phones        | A tab bar along the bottom: Shop, Search (opens the full-screen search), Cart, and Account. Hidden on checkout.                      |
-| Category tabs | A sticky, sideways-scrolling row of round category images with names; the selected one is underlined.                                |
-| Product card  | A photo carousel that swipes on touch and steps with arrows on hover, the name, a line such as "2 sizes · 2 colors", and the price.  |
-| Product page  | Title above a photo mosaic of up to five photos; details beside a purchase card; a bar with Add to cart above the tab bar on phones. |
-| Cart          | Lines with a round quantity stepper, beside an order summary card.                                                                   |
-| Checkout      | "Confirm and pay": sections separated by hairlines, addresses and payment methods as large selectable cards, and a summary card.     |
-| Order         | The status with a coloured dot, a payment card outlined in near-black while payment is due, the items, and a grey totals panel.      |
-| Login         | A centred card with a title bar and a welcome line. Phones show it without the frame.                                                |
-| Account       | Cards with an icon, a title, and a line of text. Sub-pages show a breadcrumb back to the account.                                    |
-| Blog          | Cards with a 3:2 cover photo; posts in a readable column with a large cover.                                                         |
-| Footer        | A grey band with Shop, Help, and the store's links, then © and "Prices in PHP · Ships within the Philippines".                       |
+| Area          | Pattern                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Header        | Logo, product search in the middle, Blog, and the round cart and account buttons. On phones, only the logo.                              |
+| Phones        | A tab bar along the bottom: Shop, Search (opens the full-screen search), Cart, and Account. Hidden on checkout.                          |
+| Category tabs | A sticky, sideways-scrolling row of round category images with names; the selected one is underlined.                                    |
+| Home          | Banners, then sideways rows of product cards: new arrivals, then one per top-level category, each with "Show all".                       |
+| Banner        | Full width on phones (4:5 with a phone image, else 2:1), a rounded 3:1 band on wider screens; title over a dark fade; dots; no autoplay. |
+| Product card  | A photo carousel that swipes on touch and steps with arrows on hover, the name, a line such as "2 sizes · 2 colors", and the price.      |
+| Product page  | Title above a photo mosaic of up to five photos; details beside a purchase card; a bar with Add to cart above the tab bar on phones.     |
+| Cart          | Lines with a round quantity stepper, beside an order summary card.                                                                       |
+| Checkout      | "Confirm and pay": sections separated by hairlines, addresses and payment methods as large selectable cards, and a summary card.         |
+| Order         | The status with a coloured dot, a payment card outlined in near-black while payment is due, the items, and a grey totals panel.          |
+| Login         | A centred card with a title bar and a welcome line. Phones show it without the frame.                                                    |
+| Account       | Cards with an icon, a title, and a line of text. Sub-pages show a breadcrumb back to the account.                                        |
+| Blog          | Cards with a 3:2 cover photo; posts in a readable column with a large cover.                                                             |
+| Footer        | A grey band with Shop, Help, and the store's links, then © and "Prices in PHP · Ships within the Philippines".                           |
 
 ## Components
 

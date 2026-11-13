@@ -32,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: env.siteUrl },
+    { url: `${env.siteUrl}/products` },
     { url: `${env.siteUrl}/blogs` },
     ...flatten(categories).map((category) => ({
       url: `${env.siteUrl}/categories/${category.id}`,
