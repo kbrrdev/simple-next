@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleUserRound, Menu } from 'lucide-react';
+import { CircleUserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,8 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLogout, useSession } from '@/features/auth/api';
+import { headerButtonClass } from './header-button';
 
-/** The pill at the header's right: a menu of account pages, or of logging in. */
+/** The round button at the header's right: a menu of account pages, or of logging in. */
 export function AccountMenu() {
   const { data: user } = useSession();
   const logout = useLogout();
@@ -23,14 +24,9 @@ export function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={user ? 'Account menu' : 'Log in or sign up'}
-        className="flex h-12 items-center gap-3 rounded-full border border-border bg-background pr-1.5 pl-3.5 transition-shadow outline-none hover:shadow-raise focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:shadow-raise"
+        className={headerButtonClass}
       >
-        <Menu aria-hidden className="size-4" strokeWidth={2.5} />
-        <CircleUserRound
-          aria-hidden
-          className={user ? 'size-8 text-foreground' : 'size-8 text-muted-foreground'}
-          strokeWidth={1.25}
-        />
+        <CircleUserRound aria-hidden className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

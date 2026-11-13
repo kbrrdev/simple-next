@@ -168,7 +168,7 @@ describe('AccountMenu', () => {
     renderWithQuery(<AccountMenu />);
 
     await waitFor(() => expect(request).toHaveBeenCalledWith('/api/auth/me'));
-    await userEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Account menu' }));
 
     expect(await screen.findByText('shopper@example.com')).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Orders' })).toHaveAttribute(

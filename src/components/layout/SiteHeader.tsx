@@ -22,7 +22,7 @@ export function SiteHeader() {
             <HeaderSearch />
           </Suspense>
         </div>
-        <nav aria-label="Main" className="hidden items-center justify-end gap-1 md:flex">
+        <nav aria-label="Main" className="hidden items-center justify-end gap-2 md:flex">
           <Link
             href="/blogs"
             className="rounded-full px-4 py-3 text-sm font-semibold transition-colors hover:bg-muted"
