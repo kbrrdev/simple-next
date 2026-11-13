@@ -1,15 +1,35 @@
-import Image from 'next/image';
+import { FallbackImage } from '@/components/FallbackImage';
 import type { ReactNode } from 'react';
 import { OrderTotals } from '@/components/OrderTotals';
 import { formatAddress } from '@/features/checkout/address';
 import { formatDate, formatDateTime } from '@/lib/dates';
 import { formatCents } from '@/lib/money';
 import type { GuestOrder, Order } from './api';
+import { cn } from '@/lib/utils';
 import { paymentLabels, statusLabels } from './status';
 
+// A small dot beside the status: amber while waiting, green once it moves, grey when it ends.
+const statusDot: Partial<Record<Order['status'], string>> = {
+  awaiting_payment: 'bg-amber-500',
+  pending: 'bg-brand',
+  confirmed: 'bg-brand',
+  shipped: 'bg-brand',
+  delivered: 'bg-brand',
+  returned: 'bg-muted-foreground',
+  cancelled: 'bg-muted-foreground',
+};
+
 function PaymentInstructions({ order }: { order: Order | GuestOrder }) {
+  if (order.status === 'cancelled' && order.paymentStatus === 'unpaid') {
+    return <p>This order was cancelled, so nothing is due.</p>;
+  }
   if (order.paymentType === 'cod') {
-    return <p>Pay {formatCents(order.totalCents)} in cash when your order arrives.</p>;
+    // Cash is only collected while the order is on its way.
+    return order.paymentStatus === 'unpaid' && order.status !== 'returned' ? (
+      <p>Pay {formatCents(order.totalCents)} in cash when your order arrives.</p>
+    ) : (
+      <p>{paymentLabels[order.paymentStatus]}</p>
+    );
   }
   if (order.status !== 'awaiting_payment' || order.paymentStatus !== 'unpaid' || !order.payment) {
     return <p>{paymentLabels[order.paymentStatus]}</p>;
@@ -30,15 +50,15 @@ function PaymentInstructions({ order }: { order: Order | GuestOrder }) {
         )}
         .
       </p>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-lg bg-muted p-4 text-sm">
         <dt className="text-muted-foreground">Account name</dt>
-        <dd>{accountName}</dd>
+        <dd className="font-semibold">{accountName}</dd>
         <dt className="text-muted-foreground">Account number</dt>
-        <dd className="font-medium">{accountNumber}</dd>
+        <dd className="font-semibold tabular-nums">{accountNumber}</dd>
       </dl>
       {qrUrl && (
-        <div className="relative size-48 overflow-hidden rounded-md border bg-white">
-          <Image
+        <div className="relative size-48 overflow-hidden rounded-lg border border-border bg-white">
+          <FallbackImage
             src={qrUrl}
             alt={`QR code for paying through ${providerName}`}
             fill
@@ -65,37 +85,58 @@ interface OrderDetailsProps {
 }
 
 export function OrderDetails({ order, paymentAction, actions }: OrderDetailsProps) {
+  const awaitingPayment = order.status === 'awaiting_payment' && order.paymentStatus === 'unpaid';
+
   return (
     <div className="space-y-8">
       <div className="space-y-1">
         <p className="text-sm text-muted-foreground">
           Order {order.orderNumber} · Placed {formatDate(order.createdAt)}
         </p>
-        <p className="text-lg font-semibold">{statusLabels[order.status]}</p>
+        <p className="flex items-center gap-2 text-[1.375rem] font-semibold tracking-tight">
+          <span
+            aria-hidden
+            className={cn('size-2.5 rounded-full', statusDot[order.status] ?? 'bg-foreground')}
+          />
+          {statusLabels[order.status]}
+        </p>
       </div>
 
-      <section className="space-y-2 rounded-md border p-4" aria-labelledby="payment-heading">
-        <h2 id="payment-heading" className="font-semibold">
+      <section
+        className={cn(
+          'space-y-4 rounded-xl border p-6',
+          awaitingPayment ? 'border-foreground shadow-float' : 'border-border',
+        )}
+        aria-labelledby="payment-heading"
+      >
+        <h2 id="payment-heading" className="text-lg font-semibold">
           Payment
         </h2>
         <PaymentInstructions order={order} />
         {paymentAction}
       </section>
 
-      <section className="space-y-3" aria-labelledby="items-heading">
-        <h2 id="items-heading" className="font-semibold">
+      <section className="space-y-4" aria-labelledby="items-heading">
+        <h2 id="items-heading" className="text-lg font-semibold">
           Items
         </h2>
-        <ul className="divide-y">
+        <ul className="divide-y divide-hairline border-y border-hairline">
           {order.items.map((item) => (
-            <li key={item.id} className="flex gap-4 py-3 text-sm">
-              <div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
+            <li key={item.id} className="flex gap-4 py-4 text-sm">
+              <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                 {item.imageUrl && (
-                  <Image src={item.imageUrl} alt="" fill sizes="64px" className="object-cover" />
+                  <FallbackImage
+                    src={item.imageUrl}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    iconClassName="size-4"
+                    className="object-cover"
+                  />
                 )}
               </div>
               <div className="flex-1">
-                <p className="font-medium">{item.productName}</p>
+                <p className="font-semibold">{item.productName}</p>
                 <p className="text-muted-foreground">
                   {[
                     item.option1Name && `${item.option1Name}: ${item.option1Value}`,
@@ -103,19 +144,21 @@ export function OrderDetails({ order, paymentAction, actions }: OrderDetailsProp
                     `Qty ${item.quantity}`,
                   ]
                     .filter(Boolean)
-                    .join(', ')}
+                    .join(' · ')}
                 </p>
               </div>
-              <p>{formatCents(item.lineTotalCents)}</p>
+              <p className="font-semibold tabular-nums">{formatCents(item.lineTotalCents)}</p>
             </li>
           ))}
         </ul>
-        <OrderTotals {...order} />
+        <div className="rounded-xl bg-muted p-6">
+          <OrderTotals {...order} />
+        </div>
       </section>
 
       {order.shippingAddress && (
-        <section className="space-y-1 text-sm" aria-labelledby="address-heading">
-          <h2 id="address-heading" className="font-semibold">
+        <section className="space-y-1" aria-labelledby="address-heading">
+          <h2 id="address-heading" className="text-lg font-semibold">
             Shipping to
           </h2>
           <p>

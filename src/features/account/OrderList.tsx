@@ -41,7 +41,7 @@ export function OrderList() {
           id="status-filter"
           value={status ?? ''}
           onChange={(event) => router.push(ordersHref(1, readStatus(event.target.value)))}
-          className="h-9 rounded-md border bg-background px-2 text-sm"
+          className="h-10 rounded-full border border-border bg-background px-4 text-sm"
         >
           <option value="">All orders</option>
           {orderStatuses.map((value) => (
@@ -70,7 +70,7 @@ export function OrderList() {
       )}
       {orders.data && orders.data.data.length > 0 && (
         <>
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y divide-hairline overflow-hidden rounded-xl border border-border">
             {orders.data.data.map((order) => (
               <li key={order.id}>
                 <Link

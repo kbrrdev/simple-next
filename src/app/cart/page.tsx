@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function CartPage() {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Cart</h1>
+      <h1 className="text-[1.75rem] font-semibold tracking-tight md:text-[2rem]">Cart</h1>
       <CartView />
     </div>
   );

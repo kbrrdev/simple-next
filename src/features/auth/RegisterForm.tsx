@@ -74,7 +74,12 @@ export function RegisterForm() {
           {formError(register.error)}
         </p>
       )}
-      <Button type="submit" className="w-full" disabled={register.isPending || !email || !password}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={register.isPending || !email || !password}
+      >
         {register.isPending ? 'Creating account...' : 'Create account'}
       </Button>
       <p className="text-center text-sm">

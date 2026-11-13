@@ -52,7 +52,12 @@ export function LoginForm() {
           {formError(login.error)}
         </p>
       )}
-      <Button type="submit" className="w-full" disabled={login.isPending || !email || !password}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={login.isPending || !email || !password}
+      >
         {login.isPending ? 'Logging in...' : 'Log in'}
       </Button>
       <p className="text-center text-sm">

@@ -49,7 +49,7 @@ function SaveLink() {
   return (
     <section
       aria-labelledby="save-link-heading"
-      className="space-y-3 rounded-md border-2 border-foreground p-4"
+      className="space-y-3 rounded-xl border-2 border-foreground p-5"
     >
       <h2 id="save-link-heading" className="font-semibold">
         Save this link
@@ -67,7 +67,7 @@ function SaveLink() {
           readOnly
           value={link}
           onFocus={(event) => event.target.select()}
-          className="h-9 min-w-0 flex-1 rounded-md border bg-muted px-2 text-sm"
+          className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-muted px-3 text-sm"
         />
         <Button type="button" onClick={copy}>
           {copied ? 'Copied' : 'Copy link'}

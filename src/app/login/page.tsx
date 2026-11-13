@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import { AuthCard } from '@/features/auth/AuthCard';
 import { LoginForm } from '@/features/auth/LoginForm';
 
 export const metadata: Metadata = {
@@ -9,12 +10,11 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto max-w-sm space-y-6">
-      <h1 className="text-2xl font-semibold">Log in</h1>
+    <AuthCard title="Log in" welcome="Welcome back">
       {/* The form reads ?next= from the URL, which is only known in the browser. */}
       <Suspense>
         <LoginForm />
       </Suspense>
-    </div>
+    </AuthCard>
   );
 }
