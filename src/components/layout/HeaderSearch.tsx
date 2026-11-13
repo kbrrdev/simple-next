@@ -1,15 +1,28 @@
 import { getCategoryTree, type CategoryNode } from '@/features/catalog/api';
-import { CurrentSearchPill, type CategoryOption } from './SearchPill';
+import { CurrentSearchBox } from '@/features/search/CurrentSearchBox';
+import { SearchScreen } from '@/features/search/SearchBox';
+import type { SearchCategory } from '@/features/search/suggestions';
 
-function flatten(nodes: CategoryNode[], prefix = ''): CategoryOption[] {
-  return nodes.flatMap((node) => [
-    { id: node.id, name: `${prefix}${node.name}` },
-    ...flatten(node.children, `${prefix}${node.name} › `),
-  ]);
+function flatten(nodes: CategoryNode[], parent?: string): SearchCategory[] {
+  return nodes.flatMap((node) => {
+    const label = parent ? `${parent} › ${node.name}` : node.name;
+    return [
+      { id: node.id, label, imageUrl: node.imageUrl, topLevel: !parent },
+      ...flatten(node.children, label),
+    ];
+  });
 }
 
-/** The search pill, with every category to search within. */
+async function searchCategories() {
+  return flatten(await getCategoryTree());
+}
+
+/** The header's search on wide screens, with every category for its suggestions. */
 export async function HeaderSearch() {
-  const categories = flatten(await getCategoryTree());
-  return <CurrentSearchPill categories={categories} />;
+  return <CurrentSearchBox categories={await searchCategories()} />;
+}
+
+/** The phone's full-screen search, opened from the tab bar. */
+export async function PhoneSearch() {
+  return <SearchScreen categories={await searchCategories()} />;
 }

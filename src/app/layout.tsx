@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Figtree } from 'next/font/google';
 import { Suspense } from 'react';
+import { PhoneSearch } from '@/components/layout/HeaderSearch';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
@@ -29,8 +30,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           <SiteHeader />
           <main className="page-x flex-1 py-6 md:py-8">{children}</main>
           <SiteFooter />
-          {/* Reads the current path, which is only known per request. */}
+          {/* Both read the current path, which is only known per request. */}
           <Suspense>
+            <PhoneSearch />
             <MobileTabBar />
           </Suspense>
         </Providers>
