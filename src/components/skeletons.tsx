@@ -97,7 +97,7 @@ export function CategoryTabsSkeleton() {
     <div aria-hidden className="flex gap-8 overflow-hidden pt-4 pb-3">
       {repeat(8).map((index) => (
         <div key={index} className="flex shrink-0 flex-col items-center gap-2">
-          <Skeleton className="size-6 rounded-full" />
+          <Skeleton className="size-8 rounded-full" />
           <Skeleton className="h-3 w-14" />
         </div>
       ))}
