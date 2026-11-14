@@ -42,7 +42,16 @@ export function ScrollRow({ label, children }: { label: string; children: ReactN
 
   return (
     <div className="relative">
-      <div ref={row} role="group" aria-label={label} className="scrollbar-none overflow-x-auto">
+      {/*
+        Relative, so that anything absolutely placed inside, such as a screen reader's label,
+        is clipped by the row rather than widening the page.
+      */}
+      <div
+        ref={row}
+        role="group"
+        aria-label={label}
+        className="scrollbar-none relative overflow-x-auto"
+      >
         {children}
       </div>
       {!edges.start && (

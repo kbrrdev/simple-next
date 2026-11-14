@@ -7,9 +7,9 @@ import { HeaderSearch } from './HeaderSearch';
 import { Logo } from './Logo';
 
 /**
- * The header: the store's logo, the product search in the middle, and the cart and account menu on
- * the right. On phones it holds only the logo, as search, the cart, and the account live in the
- * tab bar at the bottom.
+ * The header: the store's logo, the product search in the middle, and on the right, links to every
+ * product and the blog, the cart, and the account menu. On phones it holds only the logo, as
+ * search, the cart, and the account live in the tab bar at the bottom.
  */
 export function SiteHeader() {
   return (
@@ -23,12 +23,18 @@ export function SiteHeader() {
           </Suspense>
         </div>
         <nav aria-label="Main" className="hidden items-center justify-end gap-2 md:flex">
-          <Link
-            href="/blogs"
-            className="rounded-full px-4 py-3 text-sm font-semibold transition-colors hover:bg-muted"
-          >
-            Blog
-          </Link>
+          {[
+            { href: '/products', label: 'All products' },
+            { href: '/blogs', label: 'Blog' },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="rounded-full px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors hover:bg-muted"
+            >
+              {label}
+            </Link>
+          ))}
           {/* Both read the session, which depends on the current path. */}
           <Suspense>
             <CartButton />
