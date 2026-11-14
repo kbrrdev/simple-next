@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { getCategoryTree, type CategoryNode } from './api';
 import { CategoryTabs, ShopByCategory } from './CategoryTabs';
 
@@ -40,24 +40,46 @@ describe('ShopByCategory', () => {
     expect(screen.getByRole('link', { name: 'Bags' })).toHaveAttribute('href', '/categories/c2');
   });
 
-  it('shows the icon when it is known, and otherwise the image', async () => {
+  it('shows the image when there is one, and otherwise the icon', async () => {
     vi.mocked(getCategoryTree).mockResolvedValue([
       {
         ...category('c1', 'Bags'),
         icon: 'shopping-bag',
         imageUrl: 'http://localhost:3000/uploads/bags.jpg',
       },
-      {
-        ...category('c2', 'Shoes'),
-        icon: 'not-an-icon',
-        imageUrl: 'http://localhost:3000/uploads/shoes.jpg',
-      },
+      { ...category('c2', 'Shoes'), icon: 'footprints' },
+      { ...category('c3', 'Hats'), icon: 'not-an-icon' },
     ]);
     const { container } = render(await ShopByCategory());
 
     const images = container.querySelectorAll('img');
     expect(images).toHaveLength(1);
-    expect(images[0].getAttribute('src')).toContain('shoes.jpg');
+    expect(images[0].getAttribute('src')).toContain('bags.jpg');
+    // Only Shoes shows an icon: Bags has its image, and Hats has neither.
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: 'Shoes' }).querySelector('svg')).not.toBeNull(),
+    );
+    expect(screen.getByRole('link', { name: 'Hats' }).querySelector('svg, img')).toBeNull();
+  });
+
+  it('shows the icon when the image cannot load', async () => {
+    vi.mocked(getCategoryTree).mockResolvedValue([
+      {
+        ...category('c1', 'Bags'),
+        icon: 'shopping-bag',
+        imageUrl: 'http://localhost:3000/uploads/missing.jpg',
+      },
+    ]);
+    const { container } = render(await ShopByCategory());
+
+    const image = container.querySelector('img');
+    expect(image).not.toBeNull();
+    fireEvent.error(image as HTMLImageElement);
+
+    expect(container.querySelector('img')).toBeNull();
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: 'Bags' }).querySelector('svg')).not.toBeNull(),
+    );
   });
 
   it('shows nothing without categories', async () => {
