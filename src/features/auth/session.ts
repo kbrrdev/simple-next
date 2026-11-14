@@ -8,7 +8,7 @@ export type User = Schemas['User'];
 export const sessionKey = ['session'];
 
 // These pages work without a session, so they skip the request that restores it.
-const pagesWithoutSession = ['/login', '/register'];
+const pagesWithoutSession = ['/login', '/register', '/forgot-password', '/reset-password'];
 
 /** The logged-in user, or null. On first load, the refresh cookie restores the session. */
 async function loadSession(): Promise<User | null> {

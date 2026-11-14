@@ -22,12 +22,12 @@ const nextConfig: NextConfig = {
           development: process.env.NODE_ENV === 'development',
         }),
       },
-      {
-        // Guest order links hold a private token, which must never reach another site. This comes
-        // after the rule above, so its Referrer-Policy wins.
-        source: '/orders/guest',
+      // Guest order and password reset links hold a private token, which must never reach
+      // another site. These come after the rule above, so their Referrer-Policy wins.
+      ...['/orders/guest', '/forgot-password', '/reset-password'].map((source) => ({
+        source,
         headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
-      },
+      })),
     ];
   },
   images: {

@@ -87,3 +87,22 @@ export function useChangePassword() {
       request('/api/auth/change-password', { method: 'POST', body }),
   });
 }
+
+/** Mirrors the backend's rule as a hint. The backend also rejects common passwords. */
+export const minPasswordLength = 8;
+
+/** Asks for a reset link. The API answers the same whether or not the email has an account. */
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      request('/api/auth/forgot-password', { method: 'POST', body: { email } }),
+  });
+}
+
+/** Sets a new password from a reset link's token. The API then ends every session. */
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (body: { token: string; newPassword: string }) =>
+      request('/api/auth/reset-password', { method: 'POST', body }),
+  });
+}

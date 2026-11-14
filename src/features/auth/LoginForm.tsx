@@ -47,6 +47,11 @@ export function LoginForm() {
         error={passwordError}
         onChange={(event) => setPassword(event.target.value)}
       />
+      <p className="-mt-2 text-sm">
+        <Link href="/forgot-password" className="underline">
+          Forgot your password?
+        </Link>
+      </p>
       {login.error && !emailError && !passwordError && (
         <p role="alert" className="text-sm text-destructive">
           {formError(login.error)}

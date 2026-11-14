@@ -4,7 +4,7 @@ The customer storefront for the [simple-express](https://github.com/kbrrdev/simp
 
 See [docs/architecture.md](docs/architecture.md) for how it works, [DESIGN.md](DESIGN.md) for how it looks, and [PRODUCT.md](PRODUCT.md) for who it is for.
 
-**Status:** the storefront is built: the catalog, login, cart, checkout, orders, and account pages. The documents describe the design.
+**Status:** the storefront is built: the catalog, login, password reset, cart, checkout, orders, and account pages. The documents describe the design.
 
 ## Setup
 
@@ -19,6 +19,8 @@ npm run dev
 The production build prerenders pages from the API, so the API must be running when you run `npm run build`.
 
 The app runs at `http://localhost:3001`, as the API uses port 3000. Add `http://localhost:3001` to the backend's `CORS_ORIGINS`, which only allows the admin app by default.
+
+For password reset emails, set the backend's `PASSWORD_RESET_URL` to `http://localhost:3001/reset-password`. Development emails arrive in Mailpit, at `http://localhost:8025`.
 
 To shop with sample data, run `npm run db:seed` in simple-express. It adds `customer@example.com`, with the password `dev-password-123`.
 
