@@ -3,14 +3,34 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getImageProps } from 'next/image';
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Schemas } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 type Banner = Schemas['Banner'];
 
-/** Phones get the phone image when there is one, through `<picture>`, so only one image loads. */
+/**
+ * Phones get the phone image when there is one, through `<picture>`, so only one image loads. If
+ * the phone image cannot load, the wide image takes its place. If that fails too, the slide keeps
+ * its plain background, rather than the browser's broken-image icon.
+ */
 function BannerImage({ banner, first }: { banner: Banner; first: boolean }) {
+  const [failed, setFailed] = useState<'none' | 'phone' | 'all'>('none');
+
+  const onError = useCallback(() => {
+    setFailed((current) => (current === 'none' && banner.mobileImageUrl ? 'phone' : 'all'));
+  }, [banner.mobileImageUrl]);
+
+  // The first banner loads with the page, so it can fail before React listens for errors.
+  const checkAlreadyFailed = useCallback(
+    (image: HTMLImageElement | null) => {
+      if (image?.complete && image.currentSrc && image.naturalWidth === 0) onError();
+    },
+    [onError],
+  );
+
+  if (failed === 'all') return null;
+
   const common = {
     alt: banner.altText,
     fill: true,
@@ -19,12 +39,20 @@ function BannerImage({ banner, first }: { banner: Banner; first: boolean }) {
     fetchPriority: first ? 'high' : 'auto',
   } as const;
   const wide = getImageProps({ ...common, src: banner.imageUrl }).props;
-  const image = getImageProps({ ...common, src: banner.mobileImageUrl ?? banner.imageUrl }).props;
+  const phoneUrl = failed === 'none' ? banner.mobileImageUrl : null;
+  const image = getImageProps({ ...common, src: phoneUrl ?? banner.imageUrl }).props;
 
   return (
-    <picture>
+    // A new key loads the new source, as browsers do not reload a picture when its sources change.
+    <picture key={failed}>
       <source media="(min-width: 768px)" srcSet={wide.srcSet} sizes={wide.sizes} />
-      <img {...image} alt={banner.altText} className="object-cover" />
+      <img
+        {...image}
+        ref={checkAlreadyFailed}
+        alt={banner.altText}
+        className="object-cover"
+        onError={onError}
+      />
     </picture>
   );
 }

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { Schemas } from '@/lib/api';
 import { BannerCarousel } from './BannerCarousel';
 
@@ -62,6 +62,35 @@ describe('BannerCarousel', () => {
 
     expect(container.querySelector('source')?.getAttribute('srcset')).toContain('a.jpg');
     expect(screen.getByRole('img').getAttribute('srcset')).toContain('a-phone.jpg');
+  });
+
+  it('uses the default image when the phone image cannot load', () => {
+    const { container } = render(
+      <BannerCarousel
+        banners={[
+          banner('a', {
+            title: 'Holiday Sale',
+            mobileImageUrl: 'http://localhost:3000/uploads/a-phone.jpg',
+          }),
+        ]}
+      />,
+    );
+
+    fireEvent.error(screen.getByRole('img'));
+
+    const image = screen.getByRole('img', { name: 'Banner a' });
+    expect(image.getAttribute('srcset')).toContain('a.jpg');
+    expect(image.getAttribute('srcset')).not.toContain('a-phone.jpg');
+    expect(container.querySelector('source')?.getAttribute('srcset')).toContain('a.jpg');
+  });
+
+  it('keeps the title on a plain background when no image can load', () => {
+    render(<BannerCarousel banners={[banner('a', { title: 'Holiday Sale' })]} />);
+
+    fireEvent.error(screen.getByRole('img'));
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByText('Holiday Sale')).toBeInTheDocument();
   });
 
   it('labels each slide, and offers the next banner first', () => {
