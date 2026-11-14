@@ -33,9 +33,14 @@ import {
   usePlaceGuestOrder,
 } from './api';
 import { nextAttempt, type Attempt } from './attempt';
+import { CouponField, FreeShippingNote } from './CouponField';
 
 const newAddress = 'new';
 const cashOnDelivery = 'cod';
+
+function isEmail(value: string) {
+  return /^\S+@\S+\.\S+$/.test(value.trim());
+}
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -63,6 +68,9 @@ export function CheckoutView() {
   const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
+  const [couponCode, setCouponCode] = useState<string | null>(null);
+  // A guest's email reaches the preview once the field is left, for once-per-customer coupons.
+  const [previewEmail, setPreviewEmail] = useState<string>();
 
   const items = isGuest
     ? guestItems
@@ -70,7 +78,10 @@ export function CheckoutView() {
 
   const addresses = useAddresses(Boolean(user));
   const paymentMethods = usePaymentMethods();
-  const preview = useOrderPreview(items);
+  const preview = useOrderPreview(items, {
+    ...(couponCode && { couponCode }),
+    ...(!user && previewEmail && { email: previewEmail }),
+  });
   const createAddress = useCreateAddress();
   const placeAccountOrder = usePlaceAccountOrder();
   const placeGuestOrder = usePlaceGuestOrder();
@@ -126,12 +137,14 @@ export function CheckoutView() {
     if (!preview.data || !paymentMethod) return;
 
     const nextAddressErrors = usesAddressForm ? validateAddress(address) : {};
-    const nextEmailError = !user && !/^\S+@\S+\.\S+$/.test(email.trim()) ? 'Enter your email.' : '';
+    const nextEmailError = !user && !isEmail(email) ? 'Enter your email.' : '';
     setClientAddressErrors(nextAddressErrors);
     setEmailError(nextEmailError || undefined);
     if (Object.keys(nextAddressErrors).length > 0 || nextEmailError) return;
 
     const expectedTotalCents = preview.data.totalCents;
+    // Only a coupon the preview used goes with the order, so the total matches it.
+    const usedCoupon = preview.data.coupon?.automatic ? undefined : preview.data.coupon?.code;
 
     try {
       if (user) {
@@ -145,7 +158,7 @@ export function CheckoutView() {
 
         const current = nextAttempt(
           attempt,
-          JSON.stringify({ items, addressId, paymentMethod, expectedTotalCents }),
+          JSON.stringify({ items, addressId, paymentMethod, usedCoupon, expectedTotalCents }),
           () => crypto.randomUUID(),
         );
         setAttempt(current);
@@ -153,6 +166,7 @@ export function CheckoutView() {
         const order = await placeAccountOrder.mutateAsync({
           addressId,
           paymentMethod,
+          couponCode: usedCoupon,
           expectedTotalCents,
           idempotencyKey: current.idempotencyKey,
         });
@@ -162,7 +176,7 @@ export function CheckoutView() {
 
       const current = nextAttempt(
         attempt,
-        JSON.stringify({ items, email, address, paymentMethod, expectedTotalCents }),
+        JSON.stringify({ items, email, address, paymentMethod, usedCoupon, expectedTotalCents }),
         () => crypto.randomUUID(),
       );
       setAttempt(current);
@@ -172,6 +186,7 @@ export function CheckoutView() {
         address,
         items,
         paymentMethod,
+        couponCode: usedCoupon,
         expectedTotalCents,
         idempotencyKey: current.idempotencyKey,
       });
@@ -211,6 +226,7 @@ export function CheckoutView() {
                 }
                 hint="For your order updates."
                 onChange={(event) => setEmail(event.target.value)}
+                onBlur={() => setPreviewEmail(isEmail(email) ? email.trim() : undefined)}
               />
               <p className="text-sm">
                 Have an account?{' '}
@@ -356,7 +372,19 @@ export function CheckoutView() {
                   </li>
                 ))}
               </ul>
-              <OrderTotals {...preview.data} />
+              <CouponField
+                applied={couponCode}
+                preview={preview.isPlaceholderData ? undefined : preview.data}
+                onApply={setCouponCode}
+                onRemove={() => setCouponCode(null)}
+              />
+              <OrderTotals
+                {...preview.data}
+                couponCode={
+                  preview.data.coupon?.automatic ? null : (preview.data.coupon?.code ?? null)
+                }
+              />
+              <FreeShippingNote remainingCents={preview.data.freeShippingRemainingCents} />
             </>
           )}
           {failure && !hasFieldErrors && (

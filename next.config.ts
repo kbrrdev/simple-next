@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import { env } from './src/config/env';
+import { securityHeaders } from './src/config/security-headers';
 
 const imageHosts = [`${env.apiUrl}/uploads/**`, ...(env.imageUrl ? [`${env.imageUrl}/**`] : [])];
 
@@ -12,12 +13,22 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   async headers() {
-    // Guest order and password reset links hold a private token, which must never reach
-    // another site.
-    return ['/orders/guest', '/forgot-password', '/reset-password'].map((source) => ({
-      source,
-      headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
-    }));
+    return [
+      {
+        source: '/:path*',
+        headers: securityHeaders({
+          apiUrl: env.apiUrl,
+          imageUrl: env.imageUrl,
+          development: process.env.NODE_ENV === 'development',
+        }),
+      },
+      // Guest order and password reset links hold a private token, which must never reach
+      // another site. These come after the rule above, so their Referrer-Policy wins.
+      ...['/orders/guest', '/forgot-password', '/reset-password'].map((source) => ({
+        source,
+        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
+      })),
+    ];
   },
   images: {
     remotePatterns: imageHosts.map((host) => new URL(host)),

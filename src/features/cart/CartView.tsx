@@ -12,6 +12,33 @@ import { formatCents } from '@/lib/money';
 import { useCart, useRemoveFromCart, useSetQuantity, type CartItem } from './api';
 import { guestCart, maxItemQuantity } from './guest-cart';
 import { CartSkeleton } from '@/components/skeletons';
+import { useOrderPreview } from '@/features/checkout/api';
+import { FreeShippingNote } from '@/features/checkout/CouponField';
+
+/**
+ * Promotions the cart earns, and how far it is from free shipping, from the checkout preview. It
+ * is a hint: checkout shows the authoritative total, and any error, so a failure here shows nothing.
+ */
+function CartDiscounts({ items }: { items: CartItem[] }) {
+  const preview = useOrderPreview(
+    items
+      .filter((item) => item.available)
+      .map(({ variantId, quantity }) => ({ variantId, quantity })),
+  );
+  if (!preview.data) return null;
+
+  return (
+    <>
+      {preview.data.promotions.map((promotion) => (
+        <p key={promotion.id} className="flex justify-between gap-4 text-sm text-sale">
+          <span>{promotion.name}</span>
+          <span className="tabular-nums">−{formatCents(promotion.discountCents)}</span>
+        </p>
+      ))}
+      <FreeShippingNote remainingCents={preview.data.freeShippingRemainingCents} />
+    </>
+  );
+}
 
 // Mirrors the backend's rule as a hint. The backend refuses larger guest orders.
 const maxGuestOrderQuantity = 10;
@@ -184,6 +211,7 @@ export function CartView() {
             </span>
             <span className="font-semibold tabular-nums">{formatCents(cart.subtotalCents)}</span>
           </div>
+          <CartDiscounts items={cart.items} />
           <p className="text-sm text-muted-foreground">Shipping and tax are shown at checkout.</p>
           {isGuest && totalQuantity > maxGuestOrderQuantity && (
             <p className="text-sm text-destructive">

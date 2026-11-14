@@ -4,7 +4,7 @@ The customer storefront for the [simple-express](https://github.com/kbrrdev/simp
 
 See [docs/architecture.md](docs/architecture.md) for how it works, [DESIGN.md](DESIGN.md) for how it looks, and [PRODUCT.md](PRODUCT.md) for who it is for.
 
-**Status:** the storefront is built: the catalog, login, password reset, cart, checkout, orders, and account pages. Security headers are not set yet. The documents describe the design.
+**Status:** the storefront is built: the catalog, login, password reset, cart, checkout, orders, and account pages. The documents describe the design.
 
 ## Setup
 

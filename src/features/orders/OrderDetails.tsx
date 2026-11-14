@@ -146,6 +146,11 @@ export function OrderDetails({ order, paymentAction, actions }: OrderDetailsProp
                     .filter(Boolean)
                     .join(' · ')}
                 </p>
+                {item.promotionName && item.promotionDiscountCents > 0 && (
+                  <p className="text-sale">
+                    {item.promotionName} −{formatCents(item.promotionDiscountCents)}
+                  </p>
+                )}
               </div>
               <p className="font-semibold tabular-nums">{formatCents(item.lineTotalCents)}</p>
             </li>
