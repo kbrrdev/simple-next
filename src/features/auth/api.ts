@@ -40,7 +40,11 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: async (credentials: Credentials) => {
-      await request('/api/auth/register', { method: 'POST', body: credentials });
+      // The form only sends once the terms box is ticked.
+      await request('/api/auth/register', {
+        method: 'POST',
+        body: { ...credentials, acceptTerms: true },
+      });
       return login(credentials);
     },
     onSuccess: startSession,

@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { env } from '@/config/env';
 import { getBlogs } from '@/features/blogs/api';
 import { getCategoryTree, getProducts, type CategoryNode } from '@/features/catalog/api';
+import { getPages } from '@/features/store/api';
 
 // The API's largest page.
 const limit = 100;
@@ -24,10 +25,11 @@ function flatten(nodes: CategoryNode[]): CategoryNode[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, products, blogs] = await Promise.all([
+  const [categories, products, blogs, pages] = await Promise.all([
     getCategoryTree(),
     readAll((page) => getProducts({ page, limit })),
     readAll((page) => getBlogs(page, limit)),
+    getPages(),
   ]);
 
   return [
@@ -45,6 +47,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogs.map((blog) => ({
       url: `${env.siteUrl}/blogs/${blog.id}`,
       lastModified: blog.updatedAt,
+    })),
+    ...pages.map((page) => ({
+      url: `${env.siteUrl}/pages/${page.slug}`,
+      lastModified: page.updatedAt,
     })),
   ];
 }

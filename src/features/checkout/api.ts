@@ -48,6 +48,7 @@ interface OrderBase {
   couponCode?: string;
   expectedTotalCents: number;
   idempotencyKey: string;
+  acceptTerms: boolean;
 }
 
 /** Orders the account's cart, which the API then empties. */

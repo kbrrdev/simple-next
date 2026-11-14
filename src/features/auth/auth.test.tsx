@@ -113,6 +113,7 @@ describe('RegisterForm', () => {
 
     await userEvent.type(screen.getByLabelText('Email'), 'new@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'short');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(screen.getByText('Use at least 8 characters.')).toBeInTheDocument();
@@ -125,6 +126,7 @@ describe('RegisterForm', () => {
 
     await userEvent.type(screen.getByLabelText('Email'), 'new@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'long-enough-password');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
     await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith('/'));
@@ -132,6 +134,26 @@ describe('RegisterForm', () => {
       '/api/auth/register',
       '/api/auth/login',
     ]);
+    expect(vi.mocked(request).mock.calls[0][1]).toMatchObject({
+      body: { email: 'new@example.com', acceptTerms: true },
+    });
+    // Logging in takes no terms, and the API refuses fields it does not know.
+    expect(vi.mocked(request).mock.calls[1][1]?.body).not.toHaveProperty('acceptTerms');
+  });
+
+  it('waits for the terms to be accepted', async () => {
+    renderWithQuery(<RegisterForm />);
+
+    await userEvent.type(screen.getByLabelText('Email'), 'new@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'long-enough-password');
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeEnabled();
+    expect(screen.getByRole('link', { name: 'Terms and Conditions' })).toHaveAttribute(
+      'href',
+      '/pages/terms',
+    );
   });
 
   it('shows why the backend refused the account', async () => {
@@ -142,6 +164,7 @@ describe('RegisterForm', () => {
 
     await userEvent.type(screen.getByLabelText('Email'), 'taken@example.com');
     await userEvent.type(screen.getByLabelText('Password'), 'long-enough-password');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Email is already registered');

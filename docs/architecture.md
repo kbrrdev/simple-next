@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, all products, categories, search, products, and blogs. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built.
+Status: the public catalog is built: home, all products, categories, search, products, blogs, and store pages such as the terms. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built.
 
 ## Request Lifecycle
 
@@ -76,6 +76,8 @@ src/
 | Search `/search?q=`                   | Server   | `GET /api/products?search=`                                                                                                |
 | Product `/products/<id>`              | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                                        |
 | Blog `/blogs`, `/blogs/<id>`          | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                                     |
+| Store page `/pages/<slug>`            | Server   | `GET /api/pages/:slug`                                                                                                     |
+| Footer, on every page                 | Server   | `GET /api/store-info`, `GET /api/pages`                                                                                    |
 | Cart `/cart`                          | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`. Both: `POST /api/orders/preview` |
 | Checkout `/checkout`                  | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview` with a coupon, `POST /api/orders` or `/guest`                       |
 | Order `/orders/<id>`                  | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                                             |
@@ -98,6 +100,7 @@ src/
 - On a `401`, refresh once and retry the request once. If that fails, the session ends, and `RequireAuth` sends the shopper to `/login?next=<page>`.
 - After logging in, the shopper returns to `next`. Only paths on this site are accepted, starting with a single `/`, so that a link cannot send the shopper to another site.
 - `POST /api/auth/register` returns the user but no session, so the storefront logs in with the same details right after.
+- Registering needs the terms box ticked, and sends `acceptTerms: true`. See Store Pages.
 - Log out with `POST /api/auth/logout`, which ends the session and clears the cookie. The storefront clears its token and cached personal data even if the request fails.
 - Staff accounts can shop like anyone else. Admin work belongs in `simple-vite`.
 - Login and registration return `429` after repeated attempts. Show a "try again later" message.
@@ -139,6 +142,7 @@ The backend's `PASSWORD_RESET_URL` must point at the storefront's `/reset-passwo
 - The coupon field checks the code's format as a hint, 3 to 32 letters, digits, `-` or `_`, as a malformed code would fail the whole preview, then sends it uppercased with the preview. A code that cannot be used comes back as `couponError`, shown under the field. Only a coupon the preview used is sent with the order, so the order's total matches the preview. When an automatic discount beats the typed code, the field says so.
 - A guest's email goes to the preview once they leave the email field and it looks valid, so once-per-customer coupons are checked before the order.
 - When the store ships free over an amount, the preview's `freeShippingRemainingCents` shows "Add ₱250.00 more for free shipping", in checkout and the cart.
+- Placing the order needs the terms box ticked, and sends `acceptTerms: true`.
 - Placing the order sends that total as `expectedTotalCents`. If prices changed in between, the API rejects the order, and the shopper sees the new total.
 - Each checkout attempt has one `idempotencyKey`, created when the shopper first presses "Place order". Retrying the same attempt reuses it, so a slow network never places two orders. Changing the items, address, payment method, email, coupon, or total is a new attempt, with a new key. The key lives in the page's memory, so reloading the page mid-attempt starts a new one.
 - Accounts check out with `POST /api/orders` and a saved address, which orders the account's cart and empties it. A new address is saved with `POST /api/addresses` first, then chosen, so that a retry does not save it twice. Guests use `POST /api/orders/guest` with an email, an address that is not saved, and their cart's items, and get a private order link.
@@ -146,6 +150,12 @@ The backend's `PASSWORD_RESET_URL` must point at the storefront's `/reset-passwo
 - With a manual method, the order is `awaiting_payment`, and shows the account to pay and the deadline. The shopper pays outside the store, then submits the reference.
 - Failed checkouts return `details` for the affected items, such as out of stock, named by `variantId`. They show next to those items. After any failure, the preview is loaded again, so the shopper sees the current total.
 - After the order is placed, accounts go to `/orders/<id>`, and guests to `/orders/guest#token=<token>`. Both show the order through `OrderDetails`: the status, the items and totals, the account to pay and the deadline for a manual method, and the shipping address. The order page also takes the payment reference while a manual payment is unpaid, and offers cancelling while the API allows it.
+
+## Store Pages
+
+- The store writes its terms, privacy policy, return and shipping policies, and other pages in the admin. `/pages/<slug>` shows a published one, as Markdown like a blog post, with its last updated date. A draft, a missing page, or a slug the API would refuse shows "Page not found".
+- The footer links every published page, from `GET /api/pages`, and shows the store's contact details from `GET /api/store-info`: the email and phone as links, the address, the hours, and the social links. Empty fields are left out. Social links show as text, by their label or platform name.
+- Registering and placing an order need the shopper to tick "I agree to the Terms and Conditions and the Privacy Policy", which links to `/pages/terms` and `/pages/privacy` in a new tab. The API records when they agreed. Those links show "Page not found" until the store publishes pages with those slugs.
 
 ## Guest Orders
 
@@ -203,7 +213,7 @@ The backend's `PASSWORD_RESET_URL` must point at the storefront's `/reset-passwo
 
 - Every public page sets its title and description with the Metadata API, and product and blog pages add their image.
 - Search results are `noindex`, as they repeat the product and category pages.
-- `sitemap.xml` lists the home page, all products, categories, products, and blogs, and `robots.txt` points to it.
+- `sitemap.xml` lists the home page, all products, categories, products, blogs, and store pages, and `robots.txt` points to it.
 - Personal pages, guest order links, and password reset pages are marked `noindex`.
 - Images use `next/image`, and `next.config.ts` allows only the API's `/uploads` path and `NEXT_PUBLIC_IMAGE_URL`. Next.js refuses images from private addresses, so it allows them only when the API runs on `localhost`, as when developing.
 

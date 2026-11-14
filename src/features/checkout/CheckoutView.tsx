@@ -11,6 +11,7 @@ import { CardListSkeleton, CheckoutSkeleton } from '@/components/skeletons';
 import { OrderTotals } from '@/components/OrderTotals';
 import { ChoiceCard } from '@/components/ChoiceCard';
 import { FallbackImage } from '@/components/FallbackImage';
+import { TermsCheckbox } from '@/components/TermsCheckbox';
 import { Button } from '@/components/ui/button';
 import { useAddresses, useCreateAddress } from '@/features/addresses/api';
 import { useSession } from '@/features/auth/session';
@@ -69,6 +70,7 @@ export function CheckoutView() {
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   // A guest's email reaches the preview once the field is left, for once-per-customer coupons.
   const [previewEmail, setPreviewEmail] = useState<string>();
 
@@ -169,6 +171,7 @@ export function CheckoutView() {
           couponCode: usedCoupon,
           expectedTotalCents,
           idempotencyKey: current.idempotencyKey,
+          acceptTerms: true,
         });
         router.push(`/orders/${order.id}`);
         return;
@@ -189,6 +192,7 @@ export function CheckoutView() {
         couponCode: usedCoupon,
         expectedTotalCents,
         idempotencyKey: current.idempotencyKey,
+        acceptTerms: true,
       });
       router.push(`/orders/guest#token=${encodeURIComponent(order.guestToken)}`);
     } catch {
@@ -397,7 +401,8 @@ export function CheckoutView() {
               {failure.message} Check the marked details.
             </p>
           )}
-          <Button type="submit" size="lg" className="w-full" disabled={!canPlace}>
+          <TermsCheckbox checked={acceptTerms} onChange={setAcceptTerms} />
+          <Button type="submit" size="lg" className="w-full" disabled={!canPlace || !acceptTerms}>
             {busy ? 'Placing your order...' : 'Place order'}
           </Button>
         </div>

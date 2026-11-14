@@ -925,6 +925,347 @@ export interface paths {
         };
         trace?: never;
     };
+    "/api/store-info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the store's contact details and social links
+         * @description Empty fields are null, so the storefront can hide them.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The store info */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["StoreInfo"];
+                        };
+                    };
+                };
+                500: components["responses"]["ServerError"];
+            };
+        };
+        /**
+         * Save the store info (needs store.manage)
+         * @description Saves the whole form. Omitted fields are cleared, and socialLinks is saved in the order sent.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StoreInfoBody"];
+                };
+            };
+            responses: {
+                /** @description The saved store info */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["StoreInfo"];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List published pages, without their content
+         * @description For footer links, in title order.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The published pages */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ContentPageSummary"][];
+                            meta: components["schemas"]["PageMeta"];
+                        };
+                    };
+                };
+                500: components["responses"]["ServerError"];
+            };
+        };
+        put?: never;
+        /** Create a page, such as terms or privacy (needs pages.manage) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateContentPage"];
+                };
+            };
+            responses: {
+                /** @description The created page */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ContentPage"];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                409: components["responses"]["Conflict"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pages/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List every page, including drafts (needs pages.manage) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description All pages */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ContentPageSummary"][];
+                            meta: components["schemas"]["PageMeta"];
+                        };
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pages/admin/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get any page by id, including drafts (needs pages.manage) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["ContentPageId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ContentPage"];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete a page (needs pages.manage) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["ContentPageId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The page was deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Update a page (needs pages.manage) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["ContentPageId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateContentPage"];
+                };
+            };
+            responses: {
+                /** @description The updated page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ContentPage"];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        trace?: never;
+    };
+    "/api/pages/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a published page by slug
+         * @description Drafts return 404. Show updatedAt as the last updated date.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ContentPage"];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                404: components["responses"]["NotFound"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/categories": {
         parameters: {
             query?: never;
@@ -3852,6 +4193,8 @@ export interface paths {
                     from?: components["parameters"]["ReportFrom"];
                     /** @description Last day, in Manila time. Defaults to today. */
                     to?: components["parameters"]["ReportTo"];
+                    /** @description Adds `previous`, the same figures for the same number of days just before `from`. */
+                    compare?: components["parameters"]["ReportCompare"];
                 };
                 header?: never;
                 path?: never;
@@ -3902,6 +4245,8 @@ export interface paths {
                     from?: components["parameters"]["ReportFrom"];
                     /** @description Last day, in Manila time. Defaults to today. */
                     to?: components["parameters"]["ReportTo"];
+                    /** @description Adds `previous`, the same figures for the same number of days just before `from`. */
+                    compare?: components["parameters"]["ReportCompare"];
                     interval?: "day" | "week" | "month";
                 };
                 header?: never;
@@ -3918,6 +4263,59 @@ export interface paths {
                     content: {
                         "application/json": {
                             data: components["schemas"]["ReportSales"];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                500: components["responses"]["ServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/sales-by": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get gross sales and orders by payment method or category (needs reports.sales)
+         * @description payment_method groups orders by cash on delivery or the payment provider they were placed with. category groups item totals, without shipping, by top-level category, so it does not add up to gross sales.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description First day, in Manila time. Defaults to 29 days before `to`. */
+                    from?: components["parameters"]["ReportFrom"];
+                    /** @description Last day, in Manila time. Defaults to today. */
+                    to?: components["parameters"]["ReportTo"];
+                    /** @description Adds `previous`, the same figures for the same number of days just before `from`. */
+                    compare?: components["parameters"]["ReportCompare"];
+                    dimension: "payment_method" | "category";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The groups */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["ReportSalesBy"];
                         };
                     };
                 };
@@ -4099,7 +4497,7 @@ export interface paths {
                     page?: number;
                     limit?: number;
                     actorUserId?: string;
-                    entityType?: "asset" | "banner" | "blog" | "category" | "coupon" | "order" | "payment_method" | "product" | "product_image" | "promotion" | "role" | "sale" | "user" | "variant";
+                    entityType?: "asset" | "banner" | "blog" | "category" | "coupon" | "order" | "page" | "payment_method" | "product" | "product_image" | "promotion" | "role" | "sale" | "store_info" | "user" | "variant";
                     entityId?: string;
                     action?: string;
                     /** @description First day, in Manila time */
@@ -4165,7 +4563,7 @@ export interface paths {
                         "application/json": {
                             data: {
                                 /** @enum {string} */
-                                key: "orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view";
+                                key: "orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "store.manage" | "pages.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view";
                                 description: string;
                             }[];
                         };
@@ -4508,7 +4906,7 @@ export interface components {
             /** @description Only super admins manage roles and users. Admin can hold every permission too, so check this rather than the permissions. */
             superAdmin: boolean;
             /** @description What the user can do, for hiding what they cannot. Empty for customers. */
-            permissions: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
+            permissions: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "store.manage" | "pages.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
             /** Format: date-time */
             createdAt: string;
         };
@@ -4523,6 +4921,8 @@ export interface components {
              * @example correct-horse-battery
              */
             password: string;
+            /** @description Send true when the customer ticked the terms box, to record when they agreed */
+            acceptTerms?: boolean;
         };
         ChangePasswordBody: {
             /** @example correct-horse-battery */
@@ -4737,6 +5137,136 @@ export interface components {
              */
             endsAt?: string | null;
         };
+        StoreInfo: {
+            /** @example Simple Store */
+            name: string;
+            /**
+             * Format: email
+             * @example hello@example.com
+             */
+            email: string | null;
+            /** @example (02) 8123 4567 */
+            phone: string | null;
+            /** @example 123 Rizal Street */
+            line1: string | null;
+            /** @example Unit 4B */
+            line2: string | null;
+            /** @example Poblacion */
+            barangay: string | null;
+            /** @example Makati */
+            city: string | null;
+            /** @example Metro Manila */
+            province: string | null;
+            /** @example 1210 */
+            postalCode: string | null;
+            /** @example Mon to Sat, 9am to 6pm */
+            businessHours: string | null;
+            /** @description In display order. The storefront picks each icon from platform. */
+            socialLinks: {
+                /** @enum {string} */
+                platform: "facebook" | "instagram" | "tiktok" | "youtube" | "x" | "messenger" | "viber" | "whatsapp" | "shopee" | "lazada";
+                /** @example https://facebook.com/simplestore */
+                url: string;
+                /** @example Outlet store */
+                label?: string | null;
+            }[];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        StoreInfoBody: {
+            /** @example Simple Store */
+            name: string;
+            /**
+             * Format: email
+             * @example hello@example.com
+             */
+            email?: string | null;
+            /** @example (02) 8123 4567 */
+            phone?: string | null;
+            /** @example 123 Rizal Street */
+            line1?: string | null;
+            /** @example Unit 4B */
+            line2?: string | null;
+            /** @example Poblacion */
+            barangay?: string | null;
+            /** @example Makati */
+            city?: string | null;
+            /** @example Metro Manila */
+            province?: string | null;
+            /** @example 1210 */
+            postalCode?: string | null;
+            /** @example Mon to Sat, 9am to 6pm */
+            businessHours?: string | null;
+            /** @description In display order. The storefront picks each icon from platform. */
+            socialLinks?: {
+                /** @enum {string} */
+                platform: "facebook" | "instagram" | "tiktok" | "youtube" | "x" | "messenger" | "viber" | "whatsapp" | "shopee" | "lazada";
+                /** @example https://facebook.com/simplestore */
+                url: string;
+                /** @example Outlet store */
+                label?: string | null;
+            }[];
+        };
+        ContentPage: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Used in the storefront URL. Cannot be "admin".
+             * @example terms
+             */
+            slug: string;
+            /** @example Terms and Conditions */
+            title: string;
+            /** @example By using this store, you agree to... */
+            content: string;
+            /** @description Drafts are hidden from the storefront */
+            published: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ContentPageSummary: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Used in the storefront URL. Cannot be "admin".
+             * @example terms
+             */
+            slug: string;
+            /** @example Terms and Conditions */
+            title: string;
+            /** @description Drafts are hidden from the storefront */
+            published: boolean;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateContentPage: {
+            /**
+             * @description Used in the storefront URL. Cannot be "admin".
+             * @example terms
+             */
+            slug: string;
+            /** @example Terms and Conditions */
+            title: string;
+            /** @example By using this store, you agree to... */
+            content: string;
+            /** @description Drafts are hidden from the storefront */
+            published?: boolean;
+        };
+        UpdateContentPage: {
+            /**
+             * @description Used in the storefront URL. Cannot be "admin".
+             * @example terms
+             */
+            slug?: string;
+            /** @example Terms and Conditions */
+            title?: string;
+            /** @example By using this store, you agree to... */
+            content?: string;
+            /** @description Drafts are hidden from the storefront */
+            published?: boolean;
+        };
         Category: {
             /** Format: uuid */
             id: string;
@@ -4749,7 +5279,7 @@ export interface components {
             /** Format: uri */
             imageUrl: string | null;
             /**
-             * @description An icon name from the frontend's icon set. Show it if set, otherwise the image.
+             * @description An icon name from the frontend's icon set. Show the image if set, otherwise the icon.
              * @example shirt
              */
             icon: string | null;
@@ -4770,7 +5300,7 @@ export interface components {
             /** Format: uri */
             imageUrl: string | null;
             /**
-             * @description An icon name from the frontend's icon set. Show it if set, otherwise the image.
+             * @description An icon name from the frontend's icon set. Show the image if set, otherwise the icon.
              * @example shirt
              */
             icon: string | null;
@@ -4797,7 +5327,7 @@ export interface components {
             /** Format: uri */
             imageUrl: string | null;
             /**
-             * @description An icon name from the frontend's icon set. Show it if set, otherwise the image.
+             * @description An icon name from the frontend's icon set. Show the image if set, otherwise the icon.
              * @example shirt
              */
             icon: string | null;
@@ -5737,6 +6267,11 @@ export interface components {
             /** Format: email */
             customerEmail: string | null;
             paymentReference: string | null;
+            /**
+             * Format: date-time
+             * @description When the buyer accepted the terms, if the client sent acceptTerms
+             */
+            termsAcceptedAt: string | null;
         };
         GuestOrder: {
             /** Format: uuid */
@@ -5843,6 +6378,8 @@ export interface components {
              * @example WELCOME10
              */
             couponCode?: string;
+            /** @description Send true when the buyer ticked the terms box, to record when they agreed */
+            acceptTerms?: boolean;
         };
         SubmitPayment: {
             /** @example GC-1234567890 */
@@ -5868,6 +6405,8 @@ export interface components {
              * @example WELCOME10
              */
             couponCode?: string;
+            /** @description Send true when the buyer ticked the terms box, to record when they agreed */
+            acceptTerms?: boolean;
         };
         UpdateOrderStatus: {
             /** @enum {string} */
@@ -6090,6 +6629,12 @@ export interface components {
             couponDiscountCents: number;
             /** @description Customer accounts created in the range */
             newCustomers: number;
+            /** @description Accounts and guest emails that placed an order in the range */
+            customers: number;
+            /** @description Customers who had also ordered before the range */
+            returningCustomers: number;
+            /** @description Returning customers as a percent of customers, to one decimal place */
+            returningCustomerRatePercent: number;
             /** @description Gross sales split by the tax setting each order was placed with */
             taxByRate: {
                 /** @example 12 */
@@ -6099,6 +6644,120 @@ export interface components {
                 taxableCents: number;
                 taxCents: number;
             }[];
+            /** @description Only with compare=previous_period */
+            previous?: {
+                /**
+                 * Format: date
+                 * @example 2026-03-01
+                 */
+                from: string;
+                /**
+                 * Format: date
+                 * @example 2026-03-01
+                 */
+                to: string;
+                /** @description Every order placed, including cancelled */
+                ordersPlaced: number;
+                cancelledOrders: number;
+                /** @description Totals of orders placed, apart from cancelled ones */
+                grossSalesCents: number;
+                /** @description Gross sales divided by orders that were not cancelled */
+                averageOrderValueCents: number;
+                itemsSold: number;
+                /** @description Payments received in the range, by the day they were received */
+                collectedCents: number;
+                /** @description Payments received in the range that were later refunded */
+                refundedCents: number;
+                /** @description Collected minus refunded */
+                netCollectedCents: number;
+                /** @description Tax on gross sales */
+                taxCents: number;
+                /** @description Shipping on gross sales */
+                shippingCents: number;
+                /** @description Sale, promotion, and coupon discounts together */
+                discountCents: number;
+                /** @description Taken off by buy X get Y and bundle promotions, on gross sales */
+                promotionDiscountCents: number;
+                /** @description Taken off list prices by sales, on gross sales */
+                saleDiscountCents: number;
+                /** @description Taken off by coupons, on gross sales. Waived shipping is not included. */
+                couponDiscountCents: number;
+                /** @description Customer accounts created in the range */
+                newCustomers: number;
+                /** @description Accounts and guest emails that placed an order in the range */
+                customers: number;
+                /** @description Customers who had also ordered before the range */
+                returningCustomers: number;
+                /** @description Returning customers as a percent of customers, to one decimal place */
+                returningCustomerRatePercent: number;
+                /** @description Gross sales split by the tax setting each order was placed with */
+                taxByRate: {
+                    /** @example 12 */
+                    ratePercent: number;
+                    pricesIncludeTax: boolean;
+                    /** @description Order totals without tax, including shipping */
+                    taxableCents: number;
+                    taxCents: number;
+                }[];
+            };
+            /** @description Only with compare=previous_period. Percent change from the previous period. */
+            changes?: {
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                ordersPlaced?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                grossSalesCents?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                averageOrderValueCents?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                itemsSold?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                collectedCents?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                refundedCents?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                netCollectedCents?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                discountCents?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                newCustomers?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                customers?: number | null;
+                /**
+                 * @description Percent change. Null when the previous value was 0.
+                 * @example 12.5
+                 */
+                returningCustomers?: number | null;
+            };
         };
         ReportSales: {
             /**
@@ -6123,8 +6782,102 @@ export interface components {
                 /** @description Orders placed, apart from cancelled ones */
                 orders: number;
                 grossSalesCents: number;
+                averageOrderValueCents: number;
+                itemsSold: number;
+                /** @description Sale, promotion, and coupon discounts together */
+                discountCents: number;
+                /** @description Payments received in the period */
                 collectedCents: number;
+                /** @description Payments received in the period that were later refunded */
+                refundedCents: number;
+                /** @description Collected minus refunded */
+                netCollectedCents: number;
             }[];
+            /** @description Only with compare=previous_period. One point for each current point, in the same order, for a comparison line. */
+            previous?: {
+                /**
+                 * Format: date
+                 * @example 2026-03-01
+                 */
+                from: string;
+                /**
+                 * Format: date
+                 * @example 2026-03-01
+                 */
+                to: string;
+                points: {
+                    /**
+                     * Format: date
+                     * @description First day of the period
+                     * @example 2026-03-01
+                     */
+                    date: string;
+                    /** @description Orders placed, apart from cancelled ones */
+                    orders: number;
+                    grossSalesCents: number;
+                    averageOrderValueCents: number;
+                    itemsSold: number;
+                    /** @description Sale, promotion, and coupon discounts together */
+                    discountCents: number;
+                    /** @description Payments received in the period */
+                    collectedCents: number;
+                    /** @description Payments received in the period that were later refunded */
+                    refundedCents: number;
+                    /** @description Collected minus refunded */
+                    netCollectedCents: number;
+                }[];
+            };
+        };
+        ReportSalesBy: {
+            /**
+             * Format: date
+             * @example 2026-03-01
+             */
+            from: string;
+            /**
+             * Format: date
+             * @example 2026-03-01
+             */
+            to: string;
+            /** @enum {string} */
+            dimension: "payment_method" | "category";
+            /** @description Largest gross sales first */
+            rows: {
+                /**
+                 * @description `cod`, a payment provider, or a category id
+                 * @example cod
+                 */
+                key: string;
+                /** @example Cash on delivery */
+                label: string;
+                grossSalesCents: number;
+                orders: number;
+            }[];
+            /** @description Only with compare=previous_period */
+            previous?: {
+                /**
+                 * Format: date
+                 * @example 2026-03-01
+                 */
+                from: string;
+                /**
+                 * Format: date
+                 * @example 2026-03-01
+                 */
+                to: string;
+                /** @description Largest gross sales first */
+                rows: {
+                    /**
+                     * @description `cod`, a payment provider, or a category id
+                     * @example cod
+                     */
+                    key: string;
+                    /** @example Cash on delivery */
+                    label: string;
+                    grossSalesCents: number;
+                    orders: number;
+                }[];
+            };
         };
         ReportTopProducts: {
             /**
@@ -6142,6 +6895,11 @@ export interface components {
             items: {
                 /** Format: uuid */
                 productId: string;
+                /**
+                 * Format: uri
+                 * @description The product's first image
+                 */
+                imageUrl: string | null;
                 /** @description The product's current name */
                 name: string;
                 active: boolean;
@@ -6168,6 +6926,11 @@ export interface components {
             };
         };
         LowStockVariant: {
+            /**
+             * Format: uri
+             * @description The variant's image, or the product's first image
+             */
+            imageUrl: string | null;
             /** Format: uuid */
             variantId: string;
             /** Format: uuid */
@@ -6189,7 +6952,7 @@ export interface components {
             actorUserId: string | null;
             actorEmail: string | null;
             /** @enum {string} */
-            entityType: "asset" | "banner" | "blog" | "category" | "coupon" | "order" | "payment_method" | "product" | "product_image" | "promotion" | "role" | "sale" | "user" | "variant";
+            entityType: "asset" | "banner" | "blog" | "category" | "coupon" | "order" | "page" | "payment_method" | "product" | "product_image" | "promotion" | "role" | "sale" | "store_info" | "user" | "variant";
             /** Format: uuid */
             entityId: string;
             /** @example update */
@@ -6228,7 +6991,7 @@ export interface components {
              *       "assets.manage"
              *     ]
              */
-            permissions: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
+            permissions: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "store.manage" | "pages.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
             userCount: number;
             /** Format: date-time */
             createdAt: string;
@@ -6246,7 +7009,7 @@ export interface components {
              *       "assets.manage"
              *     ]
              */
-            permissions: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
+            permissions: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "store.manage" | "pages.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
         };
         UpdateRoleBody: {
             name?: string;
@@ -6257,7 +7020,7 @@ export interface components {
              *       "assets.manage"
              *     ]
              */
-            permissions?: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
+            permissions?: ("orders.view" | "orders.manage" | "orders.refund" | "products.view" | "products.manage" | "inventory.manage" | "categories.manage" | "blogs.manage" | "banners.manage" | "store.manage" | "pages.manage" | "promotions.manage" | "assets.manage" | "payment_methods.manage" | "reports.operations" | "reports.sales" | "audit_logs.view")[];
         };
         PageMeta: {
             /** @example 1 */
@@ -6357,6 +7120,7 @@ export interface components {
     parameters: {
         BlogId: string;
         BannerId: string;
+        ContentPageId: string;
         CategoryId: string;
         ProductId: string;
         ImageId: string;
@@ -6373,6 +7137,8 @@ export interface components {
         ReportFrom: string;
         /** @description Last day, in Manila time. Defaults to today. */
         ReportTo: string;
+        /** @description Adds `previous`, the same figures for the same number of days just before `from`. */
+        ReportCompare: "previous_period";
         RoleId: string;
     };
     requestBodies: never;
