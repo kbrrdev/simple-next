@@ -86,7 +86,7 @@ export function ShopByCategorySkeleton() {
 export function BannerSkeleton() {
   return (
     <Loading label="Loading banners">
-      <Skeleton className="-mx-6 aspect-2/1 rounded-none md:mx-0 md:aspect-3/1 md:rounded-xl" />
+      <Skeleton className="-mx-6 -mt-6 aspect-2/1 rounded-none md:mx-0 md:mt-0 md:aspect-3/1 md:rounded-xl" />
     </Loading>
   );
 }

@@ -108,7 +108,7 @@ export function BannerCarousel({ banners }: { banners: Banner[] }) {
     <section
       aria-roledescription="carousel"
       aria-label="Featured"
-      className="group relative -mx-6 overflow-hidden md:mx-0 md:rounded-xl"
+      className="group relative -mx-6 -mt-6 overflow-hidden md:mx-0 md:mt-0 md:rounded-xl"
     >
       <div
         ref={track}
