@@ -33,21 +33,31 @@ const cartItem = {
   unitPriceCents: 100000,
   quantity: 1,
   lineTotalCents: 100000,
+  compareAtPriceCents: null,
+  saleEndsAt: null,
   stock: 5,
   available: true,
 };
 
-function preview(totalCents: number) {
+function preview(totalCents: number, overrides: Record<string, unknown> = {}) {
   return {
     data: {
       items: [cartItem],
+      promotions: [],
+      coupon: null,
+      couponError: null,
+      freeShippingMinCents: null,
+      freeShippingRemainingCents: null,
       subtotalCents: 100000,
+      promotionDiscountCents: 0,
+      discountCents: 0,
       shippingCents: 15000,
       vatableCents: 102679,
       taxCents: 12321,
       totalCents,
       taxRatePercent: 12,
       pricesIncludeTax: true,
+      ...overrides,
     },
   };
 }
@@ -169,6 +179,109 @@ describe('guest checkout', () => {
     });
     expect(body.idempotencyKey).toEqual(expect.any(String));
     expect(guestCart.read()).toEqual([]);
+  });
+
+  it('applies a coupon, shows its discount, and sends it with the order', async () => {
+    mockApi({
+      'GET /api/payment-methods': { data: [{ id: gcash, type: 'manual', providerName: 'GCash' }] },
+      'POST /api/cart/preview': { data: { items: [cartItem], subtotalCents: 100000 } },
+      'POST /api/orders/preview': (body: unknown) =>
+        (body as { couponCode?: string }).couponCode === 'WELCOME10'
+          ? preview(105000, {
+              coupon: {
+                code: 'WELCOME10',
+                discountCents: 10000,
+                freeShipping: false,
+                automatic: false,
+              },
+              discountCents: 10000,
+            })
+          : preview(115000),
+      'POST /api/orders/guest': { data: { id: 'order-1', guestToken: 'secret.token' } },
+    });
+    renderWithQuery(<CheckoutView />);
+
+    await fillGuestDetails();
+    await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
+    await userEvent.type(await screen.findByLabelText('Coupon code'), 'welcome10{Enter}');
+
+    expect(await screen.findByText('Coupon WELCOME10')).toBeInTheDocument();
+    expect(screen.getByText('₱100.00 off')).toBeInTheDocument();
+    expect(await screen.findByText('₱1,050.00')).toBeInTheDocument();
+    expect(navigation.push).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    expect(bodiesSentTo('/api/orders/preview').at(-1)).toMatchObject({
+      couponCode: 'WELCOME10',
+      email: 'guest@example.com',
+    });
+    expect(bodiesSentTo('/api/orders/guest')[0]).toMatchObject({
+      couponCode: 'WELCOME10',
+      expectedTotalCents: 105000,
+    });
+  });
+
+  it('says why a coupon cannot be used, and leaves it off the order', async () => {
+    mockApi({
+      'GET /api/payment-methods': { data: [{ id: gcash, type: 'manual', providerName: 'GCash' }] },
+      'POST /api/cart/preview': { data: { items: [cartItem], subtotalCents: 100000 } },
+      'POST /api/orders/preview': (body: unknown) =>
+        preview(
+          115000,
+          (body as { couponCode?: string }).couponCode
+            ? { couponError: 'This coupon has expired.' }
+            : {},
+        ),
+      'POST /api/orders/guest': { data: { id: 'order-1', guestToken: 'secret.token' } },
+    });
+    renderWithQuery(<CheckoutView />);
+
+    await fillGuestDetails();
+    await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
+    await userEvent.type(await screen.findByLabelText('Coupon code'), 'OLD-CODE');
+    await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('This coupon has expired.');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    expect(bodiesSentTo('/api/orders/guest')[0].couponCode).toBeUndefined();
+  });
+
+  it('checks the coupon format before asking the API', async () => {
+    mockApi({
+      'GET /api/payment-methods': { data: [{ id: gcash, type: 'manual', providerName: 'GCash' }] },
+      'POST /api/cart/preview': { data: { items: [cartItem], subtotalCents: 100000 } },
+      'POST /api/orders/preview': preview(115000),
+    });
+    renderWithQuery(<CheckoutView />);
+
+    await userEvent.type(await screen.findByLabelText('Coupon code'), 'no!');
+    await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(screen.getByText('Enter 3 to 32 letters, digits, - or _.')).toBeInTheDocument();
+    expect(bodiesSentTo('/api/orders/preview').every((body) => !('couponCode' in body))).toBe(true);
+  });
+
+  it('shows promotions and how far the order is from free shipping', async () => {
+    mockApi({
+      'GET /api/payment-methods': { data: [{ id: gcash, type: 'manual', providerName: 'GCash' }] },
+      'POST /api/cart/preview': { data: { items: [cartItem], subtotalCents: 100000 } },
+      'POST /api/orders/preview': preview(110000, {
+        promotions: [{ id: 'promo-1', name: 'Buy 2, get 1 free', discountCents: 5000 }],
+        promotionDiscountCents: 5000,
+        freeShippingRemainingCents: 25000,
+      }),
+    });
+    renderWithQuery(<CheckoutView />);
+
+    expect(await screen.findByText('Buy 2, get 1 free')).toBeInTheDocument();
+    expect(screen.getByText('−₱50.00')).toBeInTheDocument();
+    expect(screen.getByText('₱250.00')).toBeInTheDocument();
+    expect(screen.getByText(/more for free shipping/)).toBeInTheDocument();
   });
 
   it('reuses the key on retry, and shows problems next to the items', async () => {

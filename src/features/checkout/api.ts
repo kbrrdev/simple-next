@@ -20,14 +20,21 @@ export function usePaymentMethods() {
   });
 }
 
-/** The total the shopper confirms, with tax and shipping, from the API. */
-export function useOrderPreview(items: GuestCartItem[]) {
+/**
+ * The total the shopper confirms, with discounts, tax, and shipping, from the API. A coupon that
+ * cannot be used comes back as `couponError`, rather than failing. A guest's email lets the API
+ * check once-per-customer coupons.
+ */
+export function useOrderPreview(
+  items: GuestCartItem[],
+  discount: { couponCode?: string; email?: string } = {},
+) {
   return useQuery({
-    queryKey: ['checkout', 'preview', items],
+    queryKey: ['checkout', 'preview', items, discount],
     queryFn: async () => {
       const { data } = await request<{ data: OrderPreview }>('/api/orders/preview', {
         method: 'POST',
-        body: { items },
+        body: { items, ...discount },
       });
       return data;
     },
@@ -38,6 +45,7 @@ export function useOrderPreview(items: GuestCartItem[]) {
 
 interface OrderBase {
   paymentMethod: string;
+  couponCode?: string;
   expectedTotalCents: number;
   idempotencyKey: string;
 }
