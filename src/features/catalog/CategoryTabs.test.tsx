@@ -20,6 +20,7 @@ function category(id: string, name: string): CategoryNode {
     parentId: null,
     imageAssetId: null,
     imageUrl: null,
+    icon: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     children: [],
@@ -37,6 +38,26 @@ describe('ShopByCategory', () => {
     expect(screen.getByRole('heading', { name: 'Shop by category' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Shirts' })).toHaveAttribute('href', '/categories/c1');
     expect(screen.getByRole('link', { name: 'Bags' })).toHaveAttribute('href', '/categories/c2');
+  });
+
+  it('shows the icon when it is known, and otherwise the image', async () => {
+    vi.mocked(getCategoryTree).mockResolvedValue([
+      {
+        ...category('c1', 'Bags'),
+        icon: 'shopping-bag',
+        imageUrl: 'http://localhost:3000/uploads/bags.jpg',
+      },
+      {
+        ...category('c2', 'Shoes'),
+        icon: 'not-an-icon',
+        imageUrl: 'http://localhost:3000/uploads/shoes.jpg',
+      },
+    ]);
+    const { container } = render(await ShopByCategory());
+
+    const images = container.querySelectorAll('img');
+    expect(images).toHaveLength(1);
+    expect(images[0].getAttribute('src')).toContain('shoes.jpg');
   });
 
   it('shows nothing without categories', async () => {

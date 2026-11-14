@@ -9,6 +9,7 @@ export interface SearchCategory {
   /** The name with its parents, such as "Men › Shoes". */
   label: string;
   imageUrl: string | null;
+  icon: string | null;
   topLevel: boolean;
 }
 

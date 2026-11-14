@@ -17,6 +17,12 @@ describe('readSearch', () => {
 });
 
 describe('productListHref', () => {
+  it('keeps the on sale filter', () => {
+    expect(productListHref('/products', { onSale: true, sort: 'name', page: 2 })).toBe(
+      '/products?onSale=true&sort=name&page=2',
+    );
+  });
+
   it('leaves out default values', () => {
     expect(productListHref('/search', { sort: 'newest', page: 1 })).toBe('/search');
   });

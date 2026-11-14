@@ -26,6 +26,8 @@
   --accent: #f7f7f7;
   --accent-foreground: #222222;
   --destructive: #b42318;
+  /* Sale prices and the Sale badge. */
+  --sale: #c2410c;
   --border: #dddddd;
   --hairline: #ebebeb;
   /* Round icon buttons in the header, such as the cart and the account menu. */
@@ -53,6 +55,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-sale: var(--sale);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);

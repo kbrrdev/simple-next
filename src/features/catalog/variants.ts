@@ -2,7 +2,13 @@ import type { ProductVariant } from './api';
 
 export type VariantChoice = Pick<
   ProductVariant,
-  'id' | 'option1Value' | 'option2Value' | 'priceCents' | 'stock'
+  | 'id'
+  | 'option1Value'
+  | 'option2Value'
+  | 'priceCents'
+  | 'stock'
+  | 'compareAtPriceCents'
+  | 'saleEndsAt'
 > &
   // The variant's own photo, when it has one.
   Partial<Pick<ProductVariant, 'assetId'>>;
