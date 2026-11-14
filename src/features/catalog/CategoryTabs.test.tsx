@@ -96,4 +96,20 @@ describe('CategoryTabs', () => {
 
     expect(screen.getByRole('link', { name: 'All' })).toHaveAttribute('href', '/products');
   });
+
+  it('shows a photo in a circle, and an icon at full size like the All tab', async () => {
+    vi.mocked(getCategoryTree).mockResolvedValue([
+      { ...category('c1', 'Bags'), imageUrl: 'http://localhost:3000/uploads/bags.jpg' },
+      { ...category('c2', 'Shoes'), icon: 'footprints' },
+    ]);
+    render(await CategoryTabs({ activeId: null }));
+
+    const photo = screen.getByRole('link', { name: 'Bags' }).querySelector('img');
+    expect(photo?.closest('.rounded-full')).toHaveClass('size-8');
+
+    const shoes = screen.getByRole('link', { name: 'Shoes' });
+    await waitFor(() => expect(shoes.querySelector('svg')).not.toBeNull());
+    expect(shoes.querySelector('svg')).toHaveClass('size-full');
+    expect(shoes.querySelector('.rounded-full')).toBeNull();
+  });
 });

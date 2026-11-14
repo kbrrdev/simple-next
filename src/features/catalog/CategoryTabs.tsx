@@ -29,15 +29,17 @@ function Tab({
           : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
       )}
     >
-      {children}
+      {/* One height for icons and photos, so that the names line up. */}
+      <span className="flex h-8 items-center">{children}</span>
       {label}
     </Link>
   );
 }
 
 /**
- * The row of top-level categories under the header, each with its image as an icon. It stays in
- * view while the shopper scrolls through products.
+ * The row of top-level categories under the header. A category with a photo shows it in a small
+ * circle. One with only an icon shows it like the All tab's, at full size and in the tab's colour.
+ * It stays in view while the shopper scrolls through products.
  */
 export async function CategoryTabs({ activeId }: { activeId: string | null }) {
   const categories = await getCategoryTree();
@@ -57,9 +59,15 @@ export async function CategoryTabs({ activeId }: { activeId: string | null }) {
               label={category.name}
               active={category.id === activeId}
             >
-              <span className="relative size-6 overflow-hidden rounded-full bg-muted opacity-80 group-hover:opacity-100 group-aria-[current=page]:opacity-100">
-                <CategoryIcon category={category} sizes="24px" />
-              </span>
+              {category.imageUrl ? (
+                <span className="relative size-8 overflow-hidden rounded-full bg-muted opacity-80 group-hover:opacity-100 group-aria-[current=page]:opacity-100">
+                  <CategoryIcon category={category} sizes="32px" />
+                </span>
+              ) : (
+                <span className="relative size-6">
+                  <CategoryIcon category={category} sizes="24px" iconClassName="size-full" />
+                </span>
+              )}
             </Tab>
           ))}
         </nav>
