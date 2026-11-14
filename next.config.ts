@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import { env } from './src/config/env';
+import { securityHeaders } from './src/config/security-headers';
 
 const imageHosts = [`${env.apiUrl}/uploads/**`, ...(env.imageUrl ? [`${env.imageUrl}/**`] : [])];
 
@@ -14,7 +15,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Guest order links hold a private token, which must never reach another site.
+        source: '/:path*',
+        headers: securityHeaders({
+          apiUrl: env.apiUrl,
+          imageUrl: env.imageUrl,
+          development: process.env.NODE_ENV === 'development',
+        }),
+      },
+      {
+        // Guest order links hold a private token, which must never reach another site. This comes
+        // after the rule above, so its Referrer-Policy wins.
         source: '/orders/guest',
         headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
       },

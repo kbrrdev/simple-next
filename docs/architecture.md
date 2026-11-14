@@ -6,7 +6,7 @@ This is the customer storefront, built with Next.js 16, React, and TypeScript, u
 
 Public pages are rendered on the server, so that search engines and first visits get real HTML. Personal pages, such as the cart, checkout, and account, run in the browser and call the API directly, the same way the `simple-vite` admin does.
 
-Status: the public catalog is built: home, all products, categories, search, products, and blogs. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built. Security headers are not set yet.
+Status: the public catalog is built: home, all products, categories, search, products, and blogs. Login, registration, the cart, checkout, orders, payment references, addresses, and account security are built.
 
 ## Request Lifecycle
 
@@ -251,10 +251,13 @@ Tests run with Vitest and React Testing Library. They render components as a use
 
 - `npm run build` creates the production build, and `npm start` serves it. The build calls the API, so build where the API is reachable.
 - Run it on the same Ubuntu server setup as the backend, behind Caddy, which handles HTTPS.
-- Set security headers in `next.config.ts`, including a Content Security Policy:
-  - `script-src 'self' 'unsafe-inline'`, as Next.js needs inline scripts. A nonce would make every page render per request, and lose the cached public pages. React escapes API data and the app never inserts HTML, which keeps the risk low.
-  - `img-src` allows only the origin of uploaded images, which is the API or the S3 public URL, and `connect-src` allows only the API.
-  - `frame-ancestors 'none'`, `base-uri 'self'`, and `form-action 'self'`.
+- Every page sends security headers, built by `src/config/security-headers.ts` from the API and image addresses, and set in `next.config.ts`:
+  - A Content Security Policy. `script-src 'self' 'unsafe-inline'`, as Next.js needs inline scripts. A nonce would make every page render per request, and lose the cached public pages. React escapes API data and the app never inserts HTML, which keeps the risk low.
+  - `img-src` allows `'self'`, for Next.js's image optimizer, and the origin of uploaded images, which is the API or the S3 public URL. `connect-src` allows only the API. Styles may be inline, as Next.js and `next/image` set them.
+  - `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, and `object-src 'none'`.
+  - The development server also gets `'unsafe-eval'` and WebSockets, for reloading.
+  - `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and a `Permissions-Policy` that turns off the camera, microphone, and location. Guest order links send `no-referrer` instead.
+  - HTTPS, and so `Strict-Transport-Security`, belong to Caddy.
 - Never use the development server in production.
 
 ## Open Questions
