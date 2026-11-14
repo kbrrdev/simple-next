@@ -145,6 +145,7 @@ describe('guest checkout', () => {
 
     await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     expect(screen.getByText('Enter your email.')).toBeInTheDocument();
@@ -164,6 +165,7 @@ describe('guest checkout', () => {
     await fillGuestDetails();
     await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     await waitFor(() =>
@@ -176,6 +178,7 @@ describe('guest checkout', () => {
       paymentMethod: gcash,
       expectedTotalCents: 115000,
       address: { phone: '09171234567', postalCode: '1605' },
+      acceptTerms: true,
     });
     expect(body.idempotencyKey).toEqual(expect.any(String));
     expect(guestCart.read()).toEqual([]);
@@ -210,6 +213,7 @@ describe('guest checkout', () => {
     expect(await screen.findByText('₱1,050.00')).toBeInTheDocument();
     expect(navigation.push).not.toHaveBeenCalled();
 
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
@@ -245,6 +249,7 @@ describe('guest checkout', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('This coupon has expired.');
 
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
@@ -306,6 +311,7 @@ describe('guest checkout', () => {
     await fillGuestDetails();
     await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
     await screen.findByText(/Could not reach the server/);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Place order' })).toBeEnabled());
@@ -332,6 +338,7 @@ describe('guest checkout', () => {
     await fillGuestDetails();
     await userEvent.click(await screen.findByRole('radio', { name: /^GCash/ }));
     await screen.findByText('₱1,150.00');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     expect(await screen.findByText('The order total has changed')).toBeInTheDocument();
@@ -359,6 +366,7 @@ describe('account checkout', () => {
     expect(await screen.findByRole('radio', { name: /Juan Dela Cruz/ })).toBeChecked();
     await userEvent.click(screen.getByRole('radio', { name: /^Cash on delivery/ }));
     await screen.findByText('₱1,150.00');
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith('/orders/order-9'));
@@ -366,6 +374,7 @@ describe('account checkout', () => {
       addressId: 'address-1',
       paymentMethod: 'cod',
       expectedTotalCents: 115000,
+      acceptTerms: true,
     });
   });
 
@@ -396,6 +405,7 @@ describe('account checkout', () => {
     await userEvent.click(screen.getByRole('radio', { name: /^Cash on delivery/ }));
     await screen.findByText('₱1,150.00');
 
+    await userEvent.click(screen.getByRole('checkbox', { name: /I agree to the Terms/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Place order' }));
     await screen.findByText(/Could not reach the server/);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Place order' })).toBeEnabled());

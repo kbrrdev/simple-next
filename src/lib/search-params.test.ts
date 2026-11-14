@@ -1,4 +1,4 @@
-import { isId, readPage } from './search-params';
+import { isId, isSlug, readPage } from './search-params';
 
 describe('readPage', () => {
   it.each([
@@ -18,5 +18,27 @@ describe('isId', () => {
   it('accepts UUIDs only', () => {
     expect(isId('df4f20d6-9a5d-4e3f-9b68-2352fb03d3cb')).toBe(true);
     expect(isId('classic-t-shirt')).toBe(false);
+  });
+});
+
+describe('isSlug', () => {
+  it('accepts the slugs the API accepts', () => {
+    expect(isSlug('terms')).toBe(true);
+    expect(isSlug('return-policy-2')).toBe(true);
+  });
+
+  it("refuses anything else, and the API's own admin path", () => {
+    for (const value of [
+      'Terms',
+      'a--b',
+      '-terms',
+      'terms-',
+      'a b',
+      '',
+      'admin',
+      'a'.repeat(101),
+    ]) {
+      expect(isSlug(value)).toBe(false);
+    }
   });
 });

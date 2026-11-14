@@ -12,6 +12,13 @@ export function isId(value: string) {
   return uuid.test(value);
 }
 
+const slug = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** A page's slug, as the API accepts it. "admin" is the API's own path. */
+export function isSlug(value: string) {
+  return value.length <= 100 && slug.test(value) && value !== 'admin';
+}
+
 /** A page number of 1 or more. Anything else falls back to the first page. */
 export function readPage(value: SearchParam) {
   const page = Number(firstValue(value));

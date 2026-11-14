@@ -75,7 +75,7 @@ Rules:
 | Login         | A centred card with a title bar and a welcome line. Phones show it without the frame.                                                                                                                                                                                                                                          |
 | Account       | Cards with an icon, a title, and a line of text. Sub-pages show a breadcrumb back to the account.                                                                                                                                                                                                                              |
 | Blog          | Cards with a 3:2 cover photo; posts in a readable column with a large cover.                                                                                                                                                                                                                                                   |
-| Footer        | A grey band with Shop, Help, and the store's links, then © and "Prices in PHP · Ships within the Philippines".                                                                                                                                                                                                                 |
+| Footer        | A grey band with Shop, Help, the store's links and pages, and Contact, then © and "Prices in PHP · Ships within the Philippines".                                                                                                                                                                                              |
 
 ## Components
 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Field } from '@/components/Field';
+import { TermsCheckbox } from '@/components/TermsCheckbox';
 import { Button } from '@/components/ui/button';
 import { minPasswordLength, useRegister } from './api';
 import { fieldError, formError } from '@/lib/form-errors';
@@ -14,6 +15,7 @@ export function RegisterForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [tooShort, setTooShort] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const register = useRegister();
   const router = useRouter();
   const next = useSearchParams().get('next');
@@ -66,6 +68,7 @@ export function RegisterForm() {
         />
         Show password
       </label>
+      <TermsCheckbox checked={acceptTerms} onChange={setAcceptTerms} />
       {register.error && !emailError && !passwordError && (
         <p role="alert" className="text-sm text-destructive">
           {formError(register.error)}
@@ -75,7 +78,7 @@ export function RegisterForm() {
         type="submit"
         size="lg"
         className="w-full"
-        disabled={register.isPending || !email || !password}
+        disabled={register.isPending || !email || !password || !acceptTerms}
       >
         {register.isPending ? 'Creating account...' : 'Create account'}
       </Button>
