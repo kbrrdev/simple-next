@@ -8,13 +8,13 @@ import { Logo } from './Logo';
 
 /**
  * The header: the store's logo, the product search in the middle, and on the right, links to every
- * product and the blog, the cart, and the account menu. On phones it holds only the logo, as
- * search, the cart, and the account live in the tab bar at the bottom.
+ * product and the blog, the cart, and the account menu. On phones it holds the logo and the cart,
+ * as search, products, and the account live in the tab bar at the bottom.
  */
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-background">
-      <div className="page-x grid h-14 grid-cols-1 items-center gap-4 md:h-24 md:grid-cols-[1fr_auto_1fr] md:gap-6">
+      <div className="page-x grid h-14 grid-cols-[1fr_auto] items-center gap-4 md:h-24 md:grid-cols-[1fr_auto_1fr] md:gap-6">
         <Logo />
         <div className="hidden min-w-0 justify-center md:flex md:w-[min(42rem,48vw)]">
           {/* The fallback is the same search box, so the header keeps its shape while it loads. */}
@@ -41,6 +41,12 @@ export function SiteHeader() {
             <AccountMenu />
           </Suspense>
         </nav>
+        {/* Phones: the cart only. Search and the account live in the tab bar. */}
+        <div className="md:hidden">
+          <Suspense>
+            <CartButton />
+          </Suspense>
+        </div>
       </div>
     </header>
   );

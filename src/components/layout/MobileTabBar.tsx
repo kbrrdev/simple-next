@@ -1,22 +1,21 @@
 'use client';
 
-import { CircleUserRound, Search, ShoppingBag, Store } from 'lucide-react';
+import { CircleUserRound, House, LayoutGrid, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from '@/features/auth/api';
-import { useCartCount } from '@/features/cart/api';
 import { searchTabId } from '@/features/search/SearchBox';
 import { searchScreen, useSearchScreenOpen } from '@/features/search/search-screen';
 import { cn } from '@/lib/utils';
 
 /**
- * The tab bar along the bottom on phones. It stays above the full-screen search, like a shopping
- * app. Checkout hides it, to keep the focus on paying.
+ * The tab bar along the bottom on phones: Home, Search, Products, and the account. The cart lives
+ * in the header, as in most shopping apps. The bar stays above the full-screen search, and
+ * checkout hides it, to keep the focus on paying.
  */
 export function MobileTabBar() {
   const pathname = usePathname();
   const { data: user } = useSession();
-  const count = useCartCount();
   const searchOpen = useSearchScreenOpen();
 
   if (pathname.startsWith('/checkout')) return null;
@@ -24,13 +23,9 @@ export function MobileTabBar() {
   const tabs = [
     {
       href: '/',
-      label: 'Shop',
-      icon: Store,
-      active:
-        !searchOpen &&
-        (pathname === '/' ||
-          pathname.startsWith('/categories') ||
-          pathname.startsWith('/products')),
+      label: 'Home',
+      icon: House,
+      active: !searchOpen && pathname === '/',
     },
     // Opens and closes the full-screen search, rather than going to a page.
     {
@@ -41,11 +36,14 @@ export function MobileTabBar() {
       opensSearch: true,
     },
     {
-      href: '/cart',
-      label: 'Cart',
-      icon: ShoppingBag,
-      active: !searchOpen && pathname === '/cart',
-      badge: count,
+      href: '/products',
+      label: 'Products',
+      icon: LayoutGrid,
+      active:
+        !searchOpen &&
+        (pathname.startsWith('/products') ||
+          pathname.startsWith('/categories') ||
+          pathname === '/search'),
     },
     {
       href: user ? '/account' : '/login',
@@ -63,22 +61,14 @@ export function MobileTabBar() {
       className="fixed inset-x-0 bottom-0 z-50 border-t border-hairline bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="grid h-16 grid-cols-4">
-        {tabs.map(({ href, label, icon: Icon, active, badge, opensSearch }) => {
+        {tabs.map(({ href, label, icon: Icon, active, opensSearch }) => {
           const className = cn(
             'flex h-full w-full flex-col items-center justify-center gap-1 text-[0.6875rem]',
             active ? 'font-semibold text-brand' : 'text-muted-foreground',
           );
           const content = (
             <>
-              <span className="relative">
-                <Icon aria-hidden className="size-6" strokeWidth={active ? 2.25 : 1.75} />
-                {badge ? (
-                  <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[0.625rem] font-bold text-brand-foreground tabular-nums">
-                    {badge > 99 ? '99+' : badge}
-                    <span className="sr-only"> items</span>
-                  </span>
-                ) : null}
-              </span>
+              <Icon aria-hidden className="size-6" strokeWidth={active ? 2.25 : 1.75} />
               {label}
             </>
           );
