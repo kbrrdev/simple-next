@@ -68,23 +68,23 @@ src/
 
 ## Pages and Backend Modules
 
-| Page                              | Rendered | Backend routes                                                                                         |
-| --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| Home `/`                          | Server   | `GET /api/banners`, `GET /api/products`, `?onSale=true`, `GET /api/categories/tree`                    |
-| All products `/products`          | Server   | `GET /api/products`                                                                                    |
-| Category `/categories/<id>`       | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
-| Search `/search?q=`               | Server   | `GET /api/products?search=`                                                                            |
-| Product `/products/<id>`          | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
-| Blog `/blogs`, `/blogs/<id>`      | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
-| Cart `/cart`                      | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
-| Checkout `/checkout`              | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
-| Order `/orders/<id>`              | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                         |
-| `/orders/guest#token=`            | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
-| `/login`, `/register`             | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
-| Password reset                    | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
-| `/account`, `/account/security`   | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
-| `/account/addresses`              | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
-| `/account/orders`, `/orders/<id>` | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
+| Page                              | Rendered | Backend routes                                                                                                             |
+| --------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Home `/`                          | Server   | `GET /api/banners`, `GET /api/products`, `?onSale=true`, `GET /api/categories/tree`                                        |
+| All products `/products`          | Server   | `GET /api/products`                                                                                                        |
+| Category `/categories/<id>`       | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                                                |
+| Search `/search?q=`               | Server   | `GET /api/products?search=`                                                                                                |
+| Product `/products/<id>`          | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                                        |
+| Blog `/blogs`, `/blogs/<id>`      | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                                     |
+| Cart `/cart`                      | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`. Both: `POST /api/orders/preview` |
+| Checkout `/checkout`              | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview` with a coupon, `POST /api/orders` or `/guest`                       |
+| Order `/orders/<id>`              | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                                             |
+| `/orders/guest#token=`            | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                                    |
+| `/login`, `/register`             | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge`                     |
+| Password reset                    | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                                    |
+| `/account`, `/account/security`   | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                                        |
+| `/account/addresses`              | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                                    |
+| `/account/orders`, `/orders/<id>` | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                                          |
 
 ## Authentication
 
@@ -130,14 +130,19 @@ Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefr
 - The preview leaves out variants that no longer exist. The cart page removes them from the guest cart, and says so. Unavailable items stay listed, marked, with a Remove button.
 - A guest cart over 10 items shows the guest order limit as a hint. The backend's error remains the authority at checkout.
 - If the merge fails, the guest cart is kept, and the shopper is told. Logging in still succeeds.
+- The cart's summary also asks `POST /api/orders/preview` for the promotions it earns and how far it is from free shipping, as a hint. Checkout shows the authoritative total.
 - The header shows the number of items. A guest's count comes from the stored cart, and a logged-in shopper's from `GET /api/cart`, once per page load.
 
 ## Checkout
 
 - `GET /api/payment-methods` lists the methods to choose from, without account details. `cod` is cash on delivery, and is offered to accounts only, as guests cannot use it.
-- `POST /api/orders/preview` returns the total, including tax and shipping, for the shopper to confirm.
+- `POST /api/orders/preview` returns the total, including discounts, tax, and shipping, for the shopper to confirm.
+- Discounts come from the API in this order: sale prices, then promotions such as buy X get Y, then the better of the typed coupon and any automatic one, then shipping and tax. The summary shows each promotion by name, and the coupon, as rows below the subtotal. Saved orders keep the promotion total, the coupon code, and each item's promotion.
+- The coupon field checks the code's format as a hint, 3 to 32 letters, digits, `-` or `_`, as a malformed code would fail the whole preview, then sends it uppercased with the preview. A code that cannot be used comes back as `couponError`, shown under the field. Only a coupon the preview used is sent with the order, so the order's total matches the preview. When an automatic discount beats the typed code, the field says so.
+- A guest's email goes to the preview once they leave the email field and it looks valid, so once-per-customer coupons are checked before the order.
+- When the store ships free over an amount, the preview's `freeShippingRemainingCents` shows "Add ₱250.00 more for free shipping", in checkout and the cart.
 - Placing the order sends that total as `expectedTotalCents`. If prices changed in between, the API rejects the order, and the shopper sees the new total.
-- Each checkout attempt has one `idempotencyKey`, created when the shopper first presses "Place order". Retrying the same attempt reuses it, so a slow network never places two orders. Changing the items, address, payment method, email, or total is a new attempt, with a new key. The key lives in the page's memory, so reloading the page mid-attempt starts a new one.
+- Each checkout attempt has one `idempotencyKey`, created when the shopper first presses "Place order". Retrying the same attempt reuses it, so a slow network never places two orders. Changing the items, address, payment method, email, coupon, or total is a new attempt, with a new key. The key lives in the page's memory, so reloading the page mid-attempt starts a new one.
 - Accounts check out with `POST /api/orders` and a saved address, which orders the account's cart and empties it. A new address is saved with `POST /api/addresses` first, then chosen, so that a retry does not save it twice. Guests use `POST /api/orders/guest` with an email, an address that is not saved, and their cart's items, and get a private order link.
 - The address form checks required fields, the Philippine mobile number, and the 4-digit postal code as hints. The backend's field errors, named `phone` or `address.phone`, show next to the fields.
 - With a manual method, the order is `awaiting_payment`, and shows the account to pay and the deadline. The shopper pays outside the store, then submits the reference.
