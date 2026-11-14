@@ -28,6 +28,12 @@ async function NewArrivals() {
   return <ProductRow title="New arrivals" href="/products" products={products} />;
 }
 
+/** Products a current sale covers. Left out when nothing is on sale. */
+async function OnSale() {
+  const { data: products } = await getProducts({ onSale: true, limit: rowSize });
+  return <ProductRow title="On sale" href="/products?onSale=true" products={products} />;
+}
+
 /** A row for each top-level category, which includes its subcategories' products. */
 async function CategoryRows() {
   const categories = await getCategoryTree();
@@ -77,6 +83,9 @@ export default function HomePage() {
         </Suspense>
         <Suspense fallback={<ShopByCategorySkeleton />}>
           <ShopByCategory />
+        </Suspense>
+        <Suspense fallback={<ProductRowSkeleton />}>
+          <OnSale />
         </Suspense>
         <Suspense fallback={<ProductRowSkeleton />}>
           <NewArrivals />

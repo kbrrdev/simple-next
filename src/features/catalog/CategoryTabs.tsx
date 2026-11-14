@@ -1,9 +1,9 @@
 import { LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { FallbackImage } from '@/components/FallbackImage';
 import { ScrollRow } from '@/components/ScrollRow';
 import { cn } from '@/lib/utils';
+import { CategoryIcon } from './CategoryIcon';
 import { findCategory, getCategoryTree, type CategoryNode } from './api';
 
 function Tab({
@@ -58,16 +58,7 @@ export async function CategoryTabs({ activeId }: { activeId: string | null }) {
               active={category.id === activeId}
             >
               <span className="relative size-6 overflow-hidden rounded-full bg-muted opacity-80 group-hover:opacity-100 group-aria-[current=page]:opacity-100">
-                {category.imageUrl && (
-                  <FallbackImage
-                    src={category.imageUrl}
-                    iconClassName="size-3"
-                    alt=""
-                    fill
-                    sizes="24px"
-                    className="object-cover"
-                  />
-                )}
+                <CategoryIcon category={category} sizes="24px" />
               </span>
             </Tab>
           ))}
@@ -97,16 +88,7 @@ export async function ShopByCategory() {
                 className="group flex w-20 flex-col items-center gap-2 text-center text-sm font-medium md:w-24"
               >
                 <span className="relative size-16 overflow-hidden rounded-full bg-muted transition-transform group-hover:scale-105 md:size-20">
-                  {category.imageUrl && (
-                    <FallbackImage
-                      src={category.imageUrl}
-                      iconClassName="size-5"
-                      alt=""
-                      fill
-                      sizes="80px"
-                      className="object-cover"
-                    />
-                  )}
+                  <CategoryIcon category={category} sizes="80px" />
                 </span>
                 <span className="line-clamp-2">{category.name}</span>
               </Link>

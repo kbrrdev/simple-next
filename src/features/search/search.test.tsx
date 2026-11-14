@@ -25,9 +25,9 @@ vi.mock('@/lib/api', async (importOriginal) => ({
 }));
 
 const categories: SearchCategory[] = [
-  { id: 'men', label: 'Men', imageUrl: null, topLevel: true },
-  { id: 'men-shirts', label: 'Men › Shirts', imageUrl: null, topLevel: false },
-  { id: 'women', label: 'Women', imageUrl: null, topLevel: true },
+  { id: 'men', label: 'Men', imageUrl: null, icon: null, topLevel: true },
+  { id: 'men-shirts', label: 'Men › Shirts', imageUrl: null, icon: null, topLevel: false },
+  { id: 'women', label: 'Women', imageUrl: null, icon: null, topLevel: true },
 ];
 
 function product(id: string, name: string, prices: number[]) {

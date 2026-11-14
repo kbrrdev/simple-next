@@ -54,7 +54,19 @@ describe('ProductGrid', () => {
       '/products/tote',
     );
     expect(screen.getByText('₱599.00')).toBeInTheDocument();
-    expect(screen.getByText('₱999.00').parentElement).toHaveTextContent('from ₱999.00');
+    expect(screen.getByText('₱999.00').closest('p')).toHaveTextContent('from ₱999.00');
+  });
+
+  it('shows a sale with the old price struck through, and its promotion', () => {
+    const tote = product('tote', 'Canvas Tote', [[47900, 4]]);
+    tote.variants[0].compareAtPriceCents = 59900;
+    tote.promotions = [{ id: 'promo', name: 'Buy 2, get 1 free', type: 'buy_x_get_y' }];
+    render(<ProductGrid empty="Nothing here" products={[tote]} />);
+
+    expect(screen.getByText('Sale')).toBeInTheDocument();
+    expect(screen.getByText('₱479.00')).toBeInTheDocument();
+    expect(screen.getByText('₱599.00').closest('s')).toHaveTextContent('was ₱599.00');
+    expect(screen.getByText('Buy 2, get 1 free')).toBeInTheDocument();
   });
 
   it('marks products that are out of stock', () => {

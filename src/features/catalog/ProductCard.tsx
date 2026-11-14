@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { FallbackImage } from '@/components/FallbackImage';
-import { formatCents } from '@/lib/money';
+import { Price } from '@/components/Price';
+import { cn } from '@/lib/utils';
 import type { Product } from './api';
 import { productImageClass } from './grid';
 import { isInStock, optionSummary, priceRange, sortedImages } from './product';
@@ -116,16 +117,25 @@ function PhotoCarousel({ product, href }: { product: Product; href: string }) {
 export function ProductCard({ product }: { product: Product }) {
   const href = `/products/${product.id}`;
   const { min, max } = priceRange(product.variants);
+  const cheapest = product.variants.find((variant) => variant.priceCents === min);
   const soldOut = !isInStock(product.variants);
+  const onSale = product.variants.some((variant) => variant.compareAtPriceCents != null);
+  const badge = soldOut ? 'Sold out' : onSale ? 'Sale' : null;
+  const promotion = product.promotions?.[0];
   const options = optionSummary(product);
 
   return (
     <div className="group">
       <div className={`relative overflow-hidden bg-muted ${productImageClass}`}>
         <PhotoCarousel product={product} href={href} />
-        {soldOut && (
-          <span className="absolute top-2 left-2 rounded-full bg-background px-2.5 py-1 text-[0.6875rem] font-semibold shadow-raise md:top-3 md:left-3 md:px-3 md:text-xs">
-            Sold out
+        {badge && (
+          <span
+            className={cn(
+              'absolute top-2 left-2 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold shadow-raise md:top-3 md:left-3 md:px-3 md:text-xs',
+              badge === 'Sale' ? 'bg-sale text-white' : 'bg-background',
+            )}
+          >
+            {badge}
           </span>
         )}
       </div>
@@ -138,8 +148,9 @@ export function ProductCard({ product }: { product: Product }) {
         {options && <p className="text-muted-foreground">{options}</p>}
         <p className="pt-1">
           {min !== max && <span>from </span>}
-          <span className="font-semibold tabular-nums">{formatCents(min)}</span>
+          <Price cents={min} compareAtCents={cheapest?.compareAtPriceCents} />
         </p>
+        {promotion && <p className="font-medium text-sale">{promotion.name}</p>}
       </div>
     </div>
   );

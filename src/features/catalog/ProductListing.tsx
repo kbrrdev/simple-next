@@ -1,18 +1,19 @@
 'use client';
 
-import { Truck } from 'lucide-react';
+import { Tag, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { percentOff, Price } from '@/components/Price';
 import { Button } from '@/components/ui/button';
 import { useAddToCart } from '@/features/cart/api';
-import { formatCents } from '@/lib/money';
 import { cn } from '@/lib/utils';
 import type { Product } from './api';
 import { OptionPicker } from './OptionPicker';
 import { sortedImages } from './product';
 import { ProductGallery } from './ProductGallery';
+import { SaleEnds } from './SaleEnds';
 import { findVariant, initialSelection, type VariantChoice } from './variants';
 
 interface ProductListingProps {
@@ -81,7 +82,10 @@ export function ProductListing({ product, category }: ProductListingProps) {
 
   const canAdd = stock > 0 && !addToCart.isPending;
   const addLabel = addToCart.isPending ? 'Adding...' : stock > 0 ? 'Add to cart' : 'Sold out';
-  const price = variant && formatCents(variant.priceCents);
+  const price = variant && (
+    <Price cents={variant.priceCents} compareAtCents={variant.compareAtPriceCents} />
+  );
+  const saving = variant && percentOff(variant.priceCents, variant.compareAtPriceCents);
 
   return (
     <>
@@ -100,10 +104,27 @@ export function ProductListing({ product, category }: ProductListingProps) {
             className="space-y-6 border-b border-hairline pt-6 pb-8 md:sticky md:top-32 md:border-b-0 md:pt-0"
           >
             <Heading product={product} category={category} />
-            <div>
-              <p className="text-2xl font-semibold tabular-nums">{price}</p>
+            <div className="space-y-1">
+              <p className="flex flex-wrap items-baseline gap-x-3 text-2xl">
+                {price}
+                {saving && <span className="text-sm font-semibold text-sale">Save {saving}%</span>}
+              </p>
+              {variant?.saleEndsAt && <SaleEnds endsAt={variant.saleEndsAt} />}
               <StockLine stock={stock} />
             </div>
+            {product.promotions && product.promotions.length > 0 && (
+              <ul className="space-y-1">
+                {product.promotions.map((promotion) => (
+                  <li
+                    key={promotion.id}
+                    className="flex items-center gap-2 text-sm font-semibold text-sale"
+                  >
+                    <Tag aria-hidden className="size-4 shrink-0" />
+                    {promotion.name}
+                  </li>
+                ))}
+              </ul>
+            )}
             <OptionPicker
               option1Name={product.option1Name}
               option2Name={product.option2Name}
@@ -152,7 +173,7 @@ export function ProductListing({ product, category }: ProductListingProps) {
       {/* Phones: the price and Add to cart stay in reach, above the tab bar. */}
       <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-4 border-t border-hairline bg-background px-6 py-3 md:hidden">
         <div className="min-w-0">
-          <p className="font-semibold tabular-nums">{price}</p>
+          <p>{price}</p>
           <p className="truncate text-xs text-muted-foreground">
             {[variant?.option1Value, variant?.option2Value].filter(Boolean).join(' · ') ||
               (stock > 0 ? 'In stock' : 'Out of stock')}

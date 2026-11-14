@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { FallbackImage } from '@/components/FallbackImage';
+import { Price } from '@/components/Price';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/api';
 import { formatCents } from '@/lib/money';
@@ -58,8 +59,8 @@ function CartLine({ item }: { item: CartItem }) {
             {options.length > 0 && (
               <p className="text-sm text-muted-foreground">{options.join(' · ')}</p>
             )}
-            <p className="text-sm text-muted-foreground tabular-nums">
-              {formatCents(item.unitPriceCents)} each
+            <p className="text-sm text-muted-foreground">
+              <Price cents={item.unitPriceCents} compareAtCents={item.compareAtPriceCents} /> each
             </p>
           </div>
           <p className="font-semibold tabular-nums">

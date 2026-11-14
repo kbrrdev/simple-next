@@ -7,7 +7,7 @@ function flatten(nodes: CategoryNode[], parent?: string): SearchCategory[] {
   return nodes.flatMap((node) => {
     const label = parent ? `${parent} › ${node.name}` : node.name;
     return [
-      { id: node.id, label, imageUrl: node.imageUrl, topLevel: !parent },
+      { id: node.id, label, imageUrl: node.imageUrl, icon: node.icon, topLevel: !parent },
       ...flatten(node.children, label),
     ];
   });

@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FallbackImage } from '@/components/FallbackImage';
+import { CategoryIcon } from '@/features/catalog/CategoryIcon';
 import { priceRange, sortedImages } from '@/features/catalog/product';
 import { formatCents } from '@/lib/money';
 import { cn } from '@/lib/utils';
@@ -74,18 +75,12 @@ function categoryOption(category: SearchCategory, query: string): Option {
   return {
     key: `category-${category.id}`,
     href: `/categories/${category.id}`,
-    tile: category.imageUrl ? (
-      <FallbackImage
-        src={category.imageUrl}
-        alt=""
-        fill
-        sizes="48px"
-        iconClassName="size-4"
-        className="object-cover"
-      />
-    ) : (
-      <LayoutGrid aria-hidden className="size-5" strokeWidth={1.5} />
-    ),
+    tile:
+      category.icon || category.imageUrl ? (
+        <CategoryIcon category={category} sizes="48px" iconClassName="size-5" />
+      ) : (
+        <LayoutGrid aria-hidden className="size-5" strokeWidth={1.5} />
+      ),
     title: <Highlighted text={category.label} query={query} />,
     detail: 'Category',
   };

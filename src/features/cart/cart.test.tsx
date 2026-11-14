@@ -39,6 +39,8 @@ function item(variantId: string, name: string, overrides: Partial<CartItem> = {}
     unitPriceCents: 50000,
     quantity: 1,
     lineTotalCents: 50000,
+    compareAtPriceCents: null,
+    saleEndsAt: null,
     stock: 10,
     available: true,
     ...overrides,
