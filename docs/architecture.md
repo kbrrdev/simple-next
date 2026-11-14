@@ -68,23 +68,23 @@ src/
 
 ## Pages and Backend Modules
 
-| Page                              | Rendered | Backend routes                                                                                         |
-| --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| Home `/`                          | Server   | `GET /api/banners`, `GET /api/products`, `?onSale=true`, `GET /api/categories/tree`                    |
-| All products `/products`          | Server   | `GET /api/products`                                                                                    |
-| Category `/categories/<id>`       | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
-| Search `/search?q=`               | Server   | `GET /api/products?search=`                                                                            |
-| Product `/products/<id>`          | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
-| Blog `/blogs`, `/blogs/<id>`      | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
-| Cart `/cart`                      | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
-| Checkout `/checkout`              | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
-| Order `/orders/<id>`              | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                         |
-| `/orders/guest#token=`            | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
-| `/login`, `/register`             | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
-| Password reset                    | Later    | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
-| `/account`, `/account/security`   | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
-| `/account/addresses`              | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
-| `/account/orders`, `/orders/<id>` | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
+| Page                                  | Rendered | Backend routes                                                                                         |
+| ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| Home `/`                              | Server   | `GET /api/banners`, `GET /api/products`, `?onSale=true`, `GET /api/categories/tree`                    |
+| All products `/products`              | Server   | `GET /api/products`                                                                                    |
+| Category `/categories/<id>`           | Server   | `GET /api/categories/tree`, `GET /api/products?categoryId=`                                            |
+| Search `/search?q=`                   | Server   | `GET /api/products?search=`                                                                            |
+| Product `/products/<id>`              | Server   | `GET /api/products/:id`, `GET /api/categories/tree`                                                    |
+| Blog `/blogs`, `/blogs/<id>`          | Server   | `GET /api/blogs`, `GET /api/blogs/:id`                                                                 |
+| Cart `/cart`                          | Browser  | Guests: `POST /api/cart/preview`. Accounts: `GET`, `DELETE /api/cart`, `/api/cart/items`               |
+| Checkout `/checkout`                  | Browser  | `GET /api/payment-methods`, `POST /api/orders/preview`, `POST /api/orders` or `/api/orders/guest`      |
+| Order `/orders/<id>`                  | Browser  | `GET /api/orders/:id`. It also confirms an account's new order                                         |
+| `/orders/guest#token=`                | Browser  | `GET /api/orders/guest/:token`, `POST /api/orders/guest/:token/payment`                                |
+| `/login`, `/register`                 | Browser  | `POST /api/auth/login`, `/register`, `/refresh`, `/logout`, `GET /api/auth/me`, `POST /api/cart/merge` |
+| `/forgot-password`, `/reset-password` | Browser  | `POST /api/auth/forgot-password`, `/reset-password`. See Password Reset                                |
+| `/account`, `/account/security`       | Browser  | `GET /api/auth/me`, `POST /api/auth/change-password`, `/logout-all`                                    |
+| `/account/addresses`                  | Browser  | `GET`, `POST /api/addresses`, `PATCH`, `DELETE /api/addresses/:id`, `POST /:id/default`                |
+| `/account/orders`, `/orders/<id>`     | Browser  | `GET /api/orders`, `GET /api/orders/:id`, `POST /:id/payment`, `POST /:id/cancel`                      |
 
 ## Authentication
 
@@ -102,20 +102,18 @@ src/
 - Staff accounts can shop like anyone else. Admin work belongs in `simple-vite`.
 - Login and registration return `429` after repeated attempts. Show a "try again later" message.
 
-## Password Reset (Later)
+## Password Reset
 
-Postponed. This is the planned design, kept for when it is built.
+The storefront has its own reset pages, linked from the login form as "Forgot your password?". They are static pages, so loading them calls no API.
 
-The storefront has its own reset pages. They are static pages, so loading them calls no API.
-
-- `/forgot-password` sends `POST /api/auth/forgot-password` with the email. It always answers `202`, so always show "If that email has an account, we sent a link", which reveals nothing about which emails have accounts.
+- `/forgot-password` sends `POST /api/auth/forgot-password` with the email. It always answers `202`, so the page always shows "If that email has an account, we sent a link", which reveals nothing about which emails have accounts.
 - The backend emails a link to `<PASSWORD_RESET_URL>#token=<token>`. The token is in the fragment, so it never reaches the Next.js server, Caddy's logs, or another site.
-- `/reset-password` reads the token from `location.hash`, then removes it from the address bar with `history.replaceState`. Without a token, it shows that the link is invalid, with a link to request a new one.
-- The form sends `POST /api/auth/reset-password` with `{ token, newPassword }`. On success, the backend ends every session, and the shopper goes to the login page.
+- `/reset-password` reads the token from `location.hash` once, keeps it in memory, and removes it from the address bar with `history.replaceState`. Without a token, it shows that the link is invalid, with a link to request a new one.
+- The form checks the 8-character minimum as a hint, then sends `POST /api/auth/reset-password` with `{ token, newPassword }`. On success, the backend ends every session, and the page offers the login page. If the link has expired or was used, the API's message shows with a link to get a new one.
 - Links expire after 30 minutes and work once, and only the newest one works. Both forms return `429` after repeated attempts.
-- Both pages are `noindex`, and send `Referrer-Policy: no-referrer`.
+- Both pages are `noindex`, and `next.config.ts` sends `Referrer-Policy: no-referrer` for them.
 
-Before building it, the backend's `PASSWORD_RESET_URL` must point at the storefront, such as `http://localhost:3001/reset-password`. It points at the admin by default, which has no reset page. The admin needs none, as staff do not reset their own passwords, so the backend only ever needs this one address.
+The backend's `PASSWORD_RESET_URL` must point at the storefront's `/reset-password`, such as `http://localhost:3001/reset-password`. The admin has no reset page, as staff do not reset their own passwords, so the backend only ever needs this one address.
 
 ## Cart
 
@@ -256,4 +254,3 @@ Tests run with Vitest and React Testing Library. They render components as a use
 
 - The API addresses products, categories, and blogs by UUID only, so their URLs are `/products/<uuid>`. Readable URLs, such as `/products/classic-t-shirt`, need slugs added to the backend first.
 - The store's logo and theme are not decided yet.
-- Password reset is postponed. See Password Reset for the planned design and the backend setting it needs.

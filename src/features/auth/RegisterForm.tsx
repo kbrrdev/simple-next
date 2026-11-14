@@ -5,12 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Field } from '@/components/Field';
 import { Button } from '@/components/ui/button';
-import { useRegister } from './api';
+import { minPasswordLength, useRegister } from './api';
 import { fieldError, formError } from '@/lib/form-errors';
 import { safeNext } from './redirect';
-
-// Mirrors the backend's rule as a hint. The backend also rejects common passwords.
-const minPasswordLength = 8;
 
 export function RegisterForm() {
   const [email, setEmail] = useState('');

@@ -5,11 +5,8 @@ import { useState, type FormEvent } from 'react';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Field } from '@/components/Field';
 import { Button } from '@/components/ui/button';
-import { useChangePassword, useLogoutEverywhere } from '@/features/auth/api';
+import { minPasswordLength, useChangePassword, useLogoutEverywhere } from '@/features/auth/api';
 import { fieldError, formError } from '@/lib/form-errors';
-
-// Mirrors the backend's rule as a hint. The backend also rejects common passwords.
-const minPasswordLength = 8;
 
 function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');
