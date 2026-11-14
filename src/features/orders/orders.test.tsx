@@ -84,6 +84,27 @@ describe('OrderDetails', () => {
     expect(screen.getAllByText('₱1,150.00').length).toBeGreaterThan(0);
   });
 
+  it('shows the coupon and promotion the order was placed with', () => {
+    render(
+      <OrderDetails
+        order={{
+          ...order,
+          couponCode: 'WELCOME10',
+          discountCents: 10000,
+          promotionDiscountCents: 5000,
+          items: [
+            { ...order.items[0], promotionName: 'Buy 2, get 1 free', promotionDiscountCents: 5000 },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Coupon WELCOME10')).toBeInTheDocument();
+    expect(screen.getByText('−₱100.00')).toBeInTheDocument();
+    expect(screen.getByText('Promotions')).toBeInTheDocument();
+    expect(screen.getByText('Buy 2, get 1 free −₱50.00')).toBeInTheDocument();
+  });
+
   it('asks for cash on delivery', () => {
     render(
       <OrderDetails
